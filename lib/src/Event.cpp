@@ -36,7 +36,7 @@ int Event::garbageNumber    = 0;
 int Event::eventCount       = 0;
 
 Event::Event(Timeline * _timeline):
-    timeStampInMilliSeconds(0), type(none), object(0), timeline(_timeline), value(0), option(false)
+    timeStampInMilliSeconds(0), type(none), object(0), timeline(_timeline), value(0), valueStr(""), option(false)
 {
     garbageNumber++;
 }
@@ -69,7 +69,7 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
     std::string     typeStr;        // The type event as string
     std::string     objectId;
 
-    _setting.lookupValue(EVENT_TIMESTAMP, timeStampInMilliSeconds);
+    _setting.lookupValue(_setting.exists(EVENT_TIMESTAMP)?EVENT_TIMESTAMP:EVENT_TIMESTAMP_SHORT, timeStampInMilliSeconds);
     _setting.lookupValue(EVENT_TYPE, typeStr);
     if (_setting.exists(EVENT_ID))  { _setting.lookupValue(EVENT_ID, id); }
     else                            { char m[128]; snprintf(m, 128, "event%05d", eventCount++); id.assign(m); }
@@ -141,6 +141,7 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
     else if (!typeStr.compare(EVENT_TYPE_CLEAR) )
     {
         type = clearcrowd;
+        if (_setting.exists(EVENT_VALUE)) {  _setting.lookupValue(EVENT_VALUE, valueStr); }
     }
     else if (!typeStr.compare(EVENT_TYPE_FASHION) )
     {
@@ -216,7 +217,7 @@ bool Event::run(int _timestamp)
                                     ret = false;
                                 }
                                 break;
-        case clearcrowd:        crowd->clear(); break;
+        case clearcrowd:        crowd->clear(valueStr); break;
         case changefashion:     if (objectIds.size())
                                 {
                                     for (unsigned int i=0;i<objectIds.size();i++)
@@ -250,7 +251,7 @@ bool Event::run(int _timestamp)
 
     if (Engine::debug)
     {
-        std::cout<<std::setw(STD_LABEL)<<std::left<<"Event::run (timestamp: "<<_timestamp<<") (type: "<<type<<")"<<std::endl;
+        std::cout<<std::setw(STD_LABEL)<<std::left<<"Event::run"<<" (timestamp: "<<_timestamp<<") (type: "<<type<<")"<<std::endl;
     }
 
     return ret;

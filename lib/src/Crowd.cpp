@@ -28,6 +28,8 @@ SPLASHOUILLE.  If not, see http://www.gnu.org/licenses/
 
 #include <SDL.h>
 
+#define CMP(a,b,o) ((o)?(a<=b):(b<=a))
+
 using namespace splashouilleImpl;
 
 int Crowd::garbageNumber = 0;
@@ -109,7 +111,7 @@ bool Crowd::insertObject(int _timestamp, splashouille::Object * _object)
     if (Engine::debug)
     {
         std::cout<<std::setw(STD_LABEL)<<std::left<<"Crowd::insertObject"
-             <<" (id:"<<(_object?_object->getId():0)<<") (timestamp: "<<_timestamp<<") (return: "<<(rc?"OK":"KO")<<")"<<std::endl;
+             <<" (id:"<<(_object?_object->getId():"0")<<") (timestamp: "<<_timestamp<<") (return: "<<(rc?"OK":"KO")<<")"<<std::endl;
     }
 
     return rc;
@@ -280,71 +282,122 @@ void Crowd::log(int _rank) const
  * Handle the mouseEvent
  * @param _x is the mouse position on x-axis
  * @param _y is the mouse position on y-axis
- * @param _button is the button pressed or released (if any)
  * @param _state is the button action (if any)
  */
-bool Crowd::mouseEvent(int _timestampInMilliSeconds UNUSED, int _x UNUSED, int _y UNUSED, int _button UNUSED, int _state UNUSED)
+bool Crowd::mouseEvent(int _timestampInMilliSeconds, int _x, int _y , int _state)
 {
-    // TODO
+    class MouseEvent : public Listener
+    {
+    private:
+        int ts, x, y, state;
+    public:
+        MouseEvent(int _ts, int _x, int _y , int _state):ts(_ts),x(_x),y(_y),state(_state) {}
+        bool onObject(splashouille::Object * _object)
+        {
+            return (_object==Engine::mouse) || (dynamic_cast<Object*>(_object)->mouseEvent(ts, x, y,state));
+        }
+    };
+    MouseEvent mouseEventListener(_timestampInMilliSeconds, _x, _y, _state);
+    forEach(&mouseEventListener, "", false);
     return true;
 }
 
 /**
  * Parse the crowd
  * @param _listener is the callback listener
+ * @param _tag is the requested tag object (all objects if empty)
+ * @param _ascendant is true for an z-index ascendant browsing (from farest to closest)
  */
-void Crowd::forEach(Listener * _listener, const std::string & _tag) const
+void Crowd::forEach(Listener * _listener, const std::string & _tag, bool _ascendant) const
 {
     bool rc = true;
     if (_tag.size())
     {
+        // THE EASY CASE: PARSE ONE TAGGED LIST REGARDING THE ORDER (ASCENDANT OR DESCENDANT)
         std::map<std::string, std::list<Object*>*>::const_iterator it = crowd.find(_tag);
         if (it!=crowd.end())
         {
-            std::list<Object*> *    objects     = it->second;
-            for (std::list<Object*>::const_iterator it=objects->begin(); rc && it!=objects->end(); it++)
+            std::list<Object*> * objects     = it->second;
+            if (_ascendant)
             {
-                rc = _listener->onObject(*it);
+                for (std::list<Object*>::const_iterator it=objects->begin(); rc && it!=objects->end(); it++)
+                {
+                    rc = _listener->onObject(*it);
+                }
+            }
+            else
+            {
+                for (std::list<Object*>::const_iterator it=objects->end(); rc && it!=objects->begin(); it--)
+                {
+                    std::list<Object*>::const_iterator prevIt = it;
+                    prevIt--;
+                    rc = _listener->onObject(*prevIt);
+                }
             }
         }
     }
     else
     {
-        // Fill the tags list by Zindex order
+        // MERGE AND PARSE THE DIFFERENT TAGGED LISTS REGARDING THE Z-INDEX OF THEIR FIRST ELEMENT
+
+        // FILL THE TAGS LIST BY ZINDEX ORDER
         std::list<objectParser>     tags;
         for (std::map<std::string, std::list<Object*>*>::const_iterator it=crowd.begin(); it!=crowd.end(); it++)
         {
-            objectIterator                      tag         = it->second->begin();
-            std::list<objectParser>::iterator   position    = tags.begin();
-            for (std::list<objectParser>::iterator itTag = tags.begin(); itTag!=tags.end(); itTag++)
+            // SKIP THE EMPTY LIST
+            if (it->second->begin()!=it->second->end())
             {
-                if ( (*((*itTag).first))->getZIndex() <= (*tag)->getZIndex()) { position = itTag; position++; }
+                // GET THE FIRST OBJECT OF THE TAGGED LIST
+                objectIterator tag = it->second->begin();
+                if (!_ascendant) { tag = it->second->end(); tag--; }
+
+                // GET THE LAST OBJECT OF THE TAGGED LIST
+                objectIterator lastTag = it->second->begin();
+                if (_ascendant) { lastTag = it->second->end(); lastTag--; }
+
+                // PLACE THE FIRST OBJECT IN THE PARSING LIST REGARDING ITS Z-INDEX
+                std::list<objectParser>::iterator   position    = tags.begin();
+                for (std::list<objectParser>::iterator itTag = tags.begin(); itTag!=tags.end(); itTag++)
+                {
+                    if ( CMP( (*((*itTag).first))->getZIndex(),(*tag)->getZIndex(), _ascendant) ) { position = itTag; position++; }
+                }
+                tags.insert(position, objectParser(tag, lastTag));
             }
-            tags.insert(position, objectParser(tag, it->second->end()));
         }
 
-        //Parse the tags list
+        // PARSE THE TAGS LIST
         while (rc && tags.size())
         {
+            // THE CURRENT Z-INDEX IS (*((*tags.begin()).first))->getZIndex(), GET THE NEXT ONE FROM ANOTHER TAG LIST
             std::list<objectParser>::iterator   position    = tags.begin();
-            int nextZIndex = std::numeric_limits<int>::max();
+            int nextZIndex = _ascendant?std::numeric_limits<int>::max():std::numeric_limits<int>::min();
             if (tags.size()>1)
             {
                 position++;
                 nextZIndex = (*((*position).first))->getZIndex();
             }
 
-            while ( rc && ((*tags.begin()).first!=(*tags.begin()).second) && (*((*tags.begin()).first))->getZIndex()<=nextZIndex)
+            // TREAT EVERY OBJECT OF THE CURRENT TAG LIST UNTIL IT REACHES THE NEXT Z-INDEX
+            bool tagNotEmpty = true;
+            while ( rc && tagNotEmpty && CMP((*((*tags.begin()).first))->getZIndex(),nextZIndex,_ascendant) )
             {
-                if ( (rc = _listener->onObject(*((*tags.begin()).first)))) { (*tags.begin()).first++; }
+                if ( (rc = _listener->onObject(*((*tags.begin()).first))))
+                {
+                    if ((*tags.begin()).first==(*tags.begin()).second)  { tagNotEmpty = false; }
+                    else {
+                        if (_ascendant) { (*tags.begin()).first++; } else { (*tags.begin()).first--; }
+                    }
+                }
             }
+
+            // IF THE CURRENT TAG LIST IS NOT ENDED, INSERT IT IN THE PARSING LIST REGARDING THE CURRENT Z_INDEX
             if (rc)
             {
-                if ((*tags.begin()).first!=(*tags.begin()).second)
+                if (tagNotEmpty)
                 {
                     for (std::list<objectParser>::iterator itTag = tags.begin(); itTag!=tags.end(); itTag++)
                     {
-                        if ( (*((*itTag).first))->getZIndex() <= nextZIndex) { position = itTag; position++; }
+                        if ( CMP((*((*itTag).first))->getZIndex(),nextZIndex,_ascendant) ) { position = itTag; position++; }
                     }
                     tags.insert(position, *tags.begin());
                 }
@@ -391,26 +444,66 @@ void Crowd::render(SDL_Surface * _surface, SDL_Rect * _offset)
 /**
  * Clear the crowd
  */
-void Crowd::clear()
+void Crowd::clear(const std::string & _tag)
 {
-    for (std::map<std::string, Object *>::iterator it = library.begin(); it!=library.end(); it++)
+    if (_tag.size())
     {
-        if ((it->second)->getListener()) { (it->second)->getListener()->onHide((it->second)); }
-        (it->second)->outCrowd();
+        // REMOVE JUST ONE TAG
+        std::map<std::string, std::list<Object*>*>::iterator itTag = crowd.find(_tag);
+        if (itTag!=crowd.end())
+        {
+            std::list<Object*> *                        objects     = itTag->second;
+            std::map<std::string, Object *>::iterator   itMap;
+            for (std::list<Object*>::iterator it=objects->begin(); it!=objects->end(); it++)
+            {
+                // UPDATE THE DROPED OBJECT
+                if ((*it)->getListener()) { (*it)->getListener()->onHide(*it); }
+                (*it)->outCrowd();
+                animation->addUpdateRect((*it)->getPosition());
 
-        animation->addUpdateRect((it->second)->getPosition());
+                // REMOVE FROM THE LOCAL LIBRARY
+                itMap = library.find((*it)->getId());
+                if (itMap!=library.end())
+                {
+                    library.erase(itMap);
+                }
+                else
+                {
+                    std::cout<<std::setw(STD_LABEL)<<std::left<<"Crowd::clear"<<" Error on library"<<std::endl;
+                }
+
+                // REMOVE FROM THE Z-INDEXED LIST
+                it = objects->erase(it);
+            }
+            // REMOVE THE TAG LIST
+            crowd.erase(itTag);
+            delete objects;
+        }
     }
-    library.clear();
-
-    for (std::map<std::string, std::list<Object*>*>::iterator it = crowd.begin(); it!=crowd.end(); it++)
+    else
     {
-        delete it->second;
+        // REMOVE EVERYTHING: THE QUICK WAY - DELETE OBJECTS FROM THE LIBRARY
+        for (std::map<std::string, Object *>::iterator it = library.begin(); it!=library.end(); it++)
+        {
+            // UPDATE THE DROPED OBJECT
+            if ((it->second)->getListener()) { (it->second)->getListener()->onHide((it->second)); }
+            (it->second)->outCrowd();
+            animation->addUpdateRect((it->second)->getPosition());
+        }
+        library.clear();
+
+        // REMOVE EVERY TAGGED Z-INDEXED LISTS
+        for (std::map<std::string, std::list<Object*>*>::iterator it = crowd.begin(); it!=crowd.end(); it++)
+        {
+            delete it->second;
+        }
+        crowd.clear();
     }
-    crowd.clear();
 
     if (Engine::debug)
     {
-        std::cout<<std::setw(STD_LABEL)<<std::left<<"Crowd::clear"<<" (animation: "<<animation->getId()<<")"<<std::endl;
+        std::cout<<std::setw(STD_LABEL)<<std::left<<"Crowd::clear"<<" (animation: "<<animation->getId()<<
+            ") (tag: "<<_tag<<")"<<std::endl;
     }
 
 }

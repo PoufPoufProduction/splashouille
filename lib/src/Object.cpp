@@ -225,40 +225,39 @@ bool Object::getPosition(int & _x, int & _y, int & _w, int & _h)
  * @param _timestampInMilliSeconds is the current timestamp
  * @param _x is the mouse position on x-axis
  * @param _y is the mouse position on y-axis
- * @param _button is the button pressed or released (if any)
  * @param _state is the button action (if any)
  */
-bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _button, int _state)
+bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state)
 {
-    bool ret = false;
+    bool ret = true;
 
     if (_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h)
     {
-        // If the mouse wasn't over the 
-        if (!mouseOver)
+        if (getStyle()->getDisplay())
         {
-            fashionSave = fashionId;
-        }
-
-        // Change the fashion if necessary
-        std::string newFashionId = _state?"onmouseclick":"onmouseover";
-        _button = 0;
-        if (newFashionId.compare(fashionId))
-        {
-            changeFashion(newFashionId);
-            if (listener)
+            // CHANGE THE FASHION IF NECESSARY
+            std::string newFashionId = _state?"mouseclick":"mouseover";
+            if (newFashionId.compare(fashionId))
             {
-                if (_state) { listener->onClick(_timestampInMilliSeconds, this); }
-                else        { listener->onMouseIn(_timestampInMilliSeconds, this); }
+                bool release = (!fashionId.compare("mouseclick"));
+                changeFashion(newFashionId);
+                if (listener)
+                {
+                    if (release)    { ret = listener->onMouseClick(_timestampInMilliSeconds, this, 0); }
+                    else            { ret = listener->onMouseOver(_timestampInMilliSeconds, this); }
+                }
             }
+            mouseOver = true;
+
+            // STOP THE EVENT ?
+            ret &= (getStyle()->getOpacity()!=255);
         }
-        mouseOver = true;
     }
     else
     if (mouseOver)
     {
         mouseOver = false;
-        changeFashion(fashionSave);
+        changeFashion("mouseout");
         if (listener) { listener->onMouseOut(_timestampInMilliSeconds, this); }
     }
     return ret;

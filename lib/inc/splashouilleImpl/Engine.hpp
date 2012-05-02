@@ -31,6 +31,7 @@ class Engine : virtual public splashouille::Engine, virtual public splashouilleI
 public:
     static splashouille::Object *       mouse;          // The object as mouse pointer
     static int                          mouseOffset[2]; // The mouse offset
+    static int                          mouseState;     // The mouse state
     static bool                         noMouse;        // No mouse handling
     static std::string                  locale;         // The locale value ["fr", "en"]
     static bool                         debug;          // Debug mode

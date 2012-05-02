@@ -51,7 +51,6 @@ public:
     std::string                             id;                     // The object id
     std::string                             type;                   // The object type
     std::string                             fashionId;              // The current fashion id
-    std::string                             fashionSave;            // Save the fashion before the mouse over
     std::string                             tag;                    // The object tag
     int                                     initialTimestamp;       // The initial timestamp of the object
     int                                     zIndex;                 // The object z-index;
@@ -68,10 +67,9 @@ public:
      * @param _timestampInMilliSeconds is the current timestamp
      * @param _x is the mouse position on x-axis
      * @param _y is the mouse position on y-axis
-     * @param _button is the button pressed or released (if any)
      * @param _state is the button action (if any)
      */
-    bool mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _button = 0, int _state = 0);
+    bool mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state = 0);
 
     /**
      * get the object id

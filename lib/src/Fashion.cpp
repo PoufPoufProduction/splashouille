@@ -174,20 +174,21 @@ void Fashion::import(libconfig::Setting & _setting)
  */
 splashouille::Style * Fashion::importTransition(libconfig::Setting & _setting)
 {
-    splashouille::Style * ret = 0;
+    splashouille::Style *   ret = 0;
+    std::string             ts(_setting.exists(FASHION_TIMESTAMP)?FASHION_TIMESTAMP:FASHION_TIMESTAMP_SHORT);
 
-    if (_setting.exists(FASHION_TIMESTAMP))
+    if (_setting.exists(ts))
     {
         // Get the transition timestamp
         int time[2];
-        if (_setting[FASHION_TIMESTAMP].getType() == libconfig::Setting::TypeArray)
+        if (_setting[ts].getType() == libconfig::Setting::TypeArray)
         {
-            time[0] = _setting[FASHION_TIMESTAMP][0];
-            time[1] = _setting[FASHION_TIMESTAMP][1];
+            time[0] = _setting[ts][0];
+            time[1] = _setting[ts][1];
         }
         else
         {
-            _setting.lookupValue(FASHION_TIMESTAMP, time[0]);
+            _setting.lookupValue(ts, time[0]);
             time[1] = time[0];
         }
 

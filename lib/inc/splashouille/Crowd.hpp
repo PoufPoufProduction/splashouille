@@ -117,13 +117,16 @@ public:
     /**
      * Parse the crowd
      * @param _listener is the callback listener
+     * @param _tag is the requested tag object (all objects if empty)
+     * @param _ascendant is true for an z-index ascendant browsing (from farest to closest)
      */
-    virtual void forEach(Listener * _listener, const std::string & _tag = "") const = 0;
+    virtual void forEach(Listener * _listener, const std::string & _tag = "", bool _ascendant = true ) const = 0;
 
     /**
-     * Clear the crowd
+     * Clear the crowd: remove objects from the crowd
+     * @param _tag is the requested tag object (all objects if empty)
      */
-    virtual void clear() = 0;
+    virtual void clear(const std::string & _tag = "") = 0;
 
 };
 

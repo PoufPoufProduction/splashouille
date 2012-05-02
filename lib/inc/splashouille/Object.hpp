@@ -49,12 +49,10 @@ public:
     {
     public:
         virtual void onShow         (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual void onMouseIn      (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
         virtual void onMouseOut     (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual void onClick        (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual void onDblClick     (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual void onRightClick   (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual void onBothClick    (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
+        virtual bool onMouseOver    (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) { return true; }
+        virtual bool onMouseClick   (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED, int _state UNUSED)
+                                    { return true; }
 
         virtual void onHide         (splashouille::Object * _object UNUSED) {}
     };

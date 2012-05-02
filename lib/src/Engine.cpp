@@ -64,6 +64,7 @@ void splashouille::Engine::deleteEngine(splashouille::Engine * _engine)
 bool                    Engine::debug           = false;
 splashouille::Object *  Engine::mouse           = 0;
 int                     Engine::mouseOffset[2]  = {0, 0};
+int                     Engine::mouseState      = 0;
 bool                    Engine::noMouse         = false;
 std::string             Engine::locale          = "fr";
 
@@ -379,14 +380,19 @@ bool Engine::run(SDL_Surface * _surface)
             // Compute the mouse event if any
             if (!noMouse)
             {
-                if (event.type == SDL_MOUSEMOTION)
+                if (event.type == SDL_MOUSEBUTTONDOWN)
                 {
-                    mouseEvent(now-begin, event.motion.x, event.motion.y);
+                    mouseState|=(1<<((int)event.button.button-1));
                 }
                 else
-                if (event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
+                if (event.type == SDL_MOUSEBUTTONUP)
                 {
-                    mouseEvent(now-begin, event.button.x, event.button.y, event.button.button, event.button.state);
+                    if (mouseState & (1<<((int)event.button.button-1))) { mouseState^=(1<<((int)event.button.button-1)); }
+                }
+
+                if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
+                {
+                    mouseEvent(now-begin, event.button.x, event.button.y, mouseState);
                 }
             }
 

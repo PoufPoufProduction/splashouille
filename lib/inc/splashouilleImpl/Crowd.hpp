@@ -131,16 +131,17 @@ public:
      * Handle the mouseEvent
      * @param _x is the mouse position on x-axis
      * @param _y is the mouse position on y-axis
-     * @param _button is the button pressed or released (if any)
      * @param _state is the button action (if any)
      */
-    bool mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _button = 0, int _state = 0);
+    bool mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state = 0);
 
     /**
      * Parse the crowd
      * @param _listener is the callback listener
+     * @param _tag is the requested tag object (all objects if empty)
+     * @param _ascendant is true for an z-index ascendant browsing (from farest to closest)
      */
-    void forEach(Listener * _listener, const std::string & _tag = "") const;
+    void forEach(Listener * _listener, const std::string & _tag = "", bool _ascendant = true) const;
 
     /**
      * Update the current crowd
@@ -157,9 +158,10 @@ public:
     void render(SDL_Surface * _surface, SDL_Rect * _offset = 0);
 
     /**
-     * Clear the crowd
+     * Clear the crowd: remove objects from the crowd
+     * @param _tag is the requested tag object (all objects if empty)
      */
-    void clear();
+    void clear(const std::string & _tag = "");
 
     /**
      * Forward the callback

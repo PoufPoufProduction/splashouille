@@ -212,19 +212,18 @@ bool Animation::update(int _timestamp)
  * @param _timestampInMilliSeconds is the current timestamp
  * @param _x is the mouse position on x-axis
  * @param _y is the mouse position on y-axis
- * @param _button is the button pressed or released (if any)
  * @param _state is the button action (if any)
  */
-bool Animation::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _button, int _state)
+bool Animation::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state)
 {
     bool ret = false;
 
     if ((_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h) ||
         (mouseOver) )
     {
-        ret = crowd->mouseEvent(_timestampInMilliSeconds, _x-position->x, _y-position->y, _button, _state);
+        ret = crowd->mouseEvent(_timestampInMilliSeconds, _x-position->x, _y-position->y, _state);
     }
-    Object::mouseEvent(_timestampInMilliSeconds, _x, _y, _button, _state);
+    Object::mouseEvent(_timestampInMilliSeconds, _x, _y, _state);
 
     return ret;
 }

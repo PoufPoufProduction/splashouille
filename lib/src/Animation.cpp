@@ -216,14 +216,14 @@ bool Animation::update(int _timestamp)
  */
 bool Animation::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state)
 {
-    bool ret = false;
+    bool ret = true;
 
+    Object::mouseEvent(_timestampInMilliSeconds, _x, _y, _state);
     if ((_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h) ||
         (mouseOver) )
     {
         ret = crowd->mouseEvent(_timestampInMilliSeconds, _x-position->x, _y-position->y, _state);
     }
-    Object::mouseEvent(_timestampInMilliSeconds, _x, _y, _state);
 
     return ret;
 }

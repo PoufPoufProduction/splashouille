@@ -64,7 +64,6 @@ void splashouille::Engine::deleteEngine(splashouille::Engine * _engine)
 bool                    Engine::debug           = false;
 splashouille::Object *  Engine::mouse           = 0;
 int                     Engine::mouseOffset[2]  = {0, 0};
-int                     Engine::mouseState      = 0;
 bool                    Engine::noMouse         = false;
 std::string             Engine::locale          = "fr";
 
@@ -310,6 +309,10 @@ bool Engine::run(SDL_Surface * _surface)
     int             frameSec        = 0;
     unsigned int    lastSecond      = 0;
     Uint32          lastNow         = 0;
+    Uint16          mouseX          = 0;
+    Uint16          mouseY          = 0;
+    int             mouseState      = 0;
+    bool            rc;
 
     // Save the background
     background      = SDL_DisplayFormat(_surface);
@@ -331,10 +334,13 @@ bool Engine::run(SDL_Surface * _surface)
 
     while(running)
     {
+        // INIT THE EVENT
+        event.type = 0;
+
         // Handle the poll event
         while (SDL_PollEvent(&event))
         {
-            bool rc = false;
+            rc = false;
 
             // The QUIT EVENT
             if (event.type == SDL_QUIT)
@@ -347,11 +353,32 @@ bool Engine::run(SDL_Surface * _surface)
             }
             else
             {
-                // Handle the mouse pointer if any
-                if (event.type == SDL_MOUSEMOTION && mouse)
+                // COMPUTE THE MOUSE EVENT IF ANY
+                if (!noMouse)
                 {
-                    mouse->getStyle()->setLeft(event.motion.x - mouseOffset[0]*mouse->getStyle()->getWidth()/10);
-                    mouse->getStyle()->setTop(event.motion.y - mouseOffset[1]*mouse->getStyle()->getHeight()/10);
+                    if (event.type == SDL_MOUSEBUTTONDOWN)
+                    {
+                        mouseState|=(1<<((int)event.button.button-1));
+                    }
+                    else
+                    if (event.type == SDL_MOUSEBUTTONUP)
+                    {
+                        if (mouseState & (1<<((int)event.button.button-1)))
+                        {
+                            mouseState^=(1<<((int)event.button.button-1));
+                        }
+                    }
+                    else
+                    if (event.type == SDL_MOUSEMOTION)
+                    {
+                        mouseX = event.motion.x;
+                        mouseY = event.motion.y;
+                        if (mouse)
+                        {
+                            mouse->getStyle()->setLeft(mouseX - mouseOffset[0]*mouse->getStyle()->getWidth()/10);
+                            mouse->getStyle()->setTop(mouseY - mouseOffset[1]*mouse->getStyle()->getHeight()/10);
+                        }
+                    }
                 }
 
                 // Forward the event to the listeners
@@ -362,41 +389,25 @@ bool Engine::run(SDL_Surface * _surface)
             }
         }
 
-        // The millisecond is the limit of the SDL_GetTicks()
+        // THE MILLISECOND IS THE LIMIT OF THE SDL_GETTICKS()
         if (!onPause && now!=lastNow)
         {
-            // Update the elements
+            // FORWARD THE MOUSE EVENT
+            if (!noMouse) { mouseEvent(now-begin, event.button.x, event.button.y, mouseState); }
+
+            // UPDATE THE ELEMENTS
             lastNow = now;
 
-            // Deal with the onFrame listener
+            // DEAL WITH THE ONFRAME LISTENER
             for (std::list<ListenerElement*>::iterator it=listeners.begin(); it!=listeners.end(); it++)
             {
                 (*it)->listener->onFrame(frame, now-begin);
             }
 
-            // Handle the timeline event
+            // HANDLE THE TIMELINE EVENT
             update(now-begin);
 
-            // Compute the mouse event if any
-            if (!noMouse)
-            {
-                if (event.type == SDL_MOUSEBUTTONDOWN)
-                {
-                    mouseState|=(1<<((int)event.button.button-1));
-                }
-                else
-                if (event.type == SDL_MOUSEBUTTONUP)
-                {
-                    if (mouseState & (1<<((int)event.button.button-1))) { mouseState^=(1<<((int)event.button.button-1)); }
-                }
-
-                if (event.type == SDL_MOUSEMOTION || event.type == SDL_MOUSEBUTTONDOWN || event.type == SDL_MOUSEBUTTONUP)
-                {
-                    mouseEvent(now-begin, event.button.x, event.button.y, mouseState);
-                }
-            }
-
-            // Deal with the onSecond listener if second is different
+            // DEAL WITH THE ONSECOND LISTENER IF SECOND IS DIFFERENT
             if (lastSecond!=(now-begin)/1000)
             {
                 lastSecond = (now-begin)/1000;

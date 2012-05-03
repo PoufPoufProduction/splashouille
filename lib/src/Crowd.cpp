@@ -294,7 +294,19 @@ bool Crowd::mouseEvent(int _timestampInMilliSeconds, int _x, int _y , int _state
         MouseEvent(int _ts, int _x, int _y , int _state):ts(_ts),x(_x),y(_y),state(_state) {}
         bool onObject(splashouille::Object * _object)
         {
-            return (_object==Engine::mouse) || (dynamic_cast<Object*>(_object)->mouseEvent(ts, x, y,state));
+            bool ret = (_object==Engine::mouse);
+            if (!ret)
+            {
+                if (_object->isAnimation())
+                {
+                    ret = dynamic_cast<Animation*>(_object)->mouseEvent(ts, x, y,state);
+                }
+                else
+                {
+                    ret = dynamic_cast<Object*>(_object)->mouseEvent(ts, x, y,state);
+                }
+            }
+            return ret;
         }
     };
     MouseEvent mouseEventListener(_timestampInMilliSeconds, _x, _y, _state);

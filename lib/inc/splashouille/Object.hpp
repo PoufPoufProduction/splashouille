@@ -97,6 +97,12 @@ public:
     virtual splashouille::Fashion * getFashion() = 0;
 
     /**
+     * Get the current fashion id
+     * @return the fashion id as string
+     */
+    virtual const std::string & getFashionId() = 0;
+
+    /**
      * Get the style
      * @return the style
      */
@@ -162,6 +168,11 @@ public:
      * @return the associated data (0 if none)
      */
     virtual splashouille::Object::AssociatedData * getAssociatedData() = 0;
+
+    /**
+     * Update the tile index (works only for image)
+     */
+    virtual void setTileIndex(int _tileIndex) = 0;
 
     /**
      * Types accessors

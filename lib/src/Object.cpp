@@ -220,6 +220,17 @@ bool Object::getPosition(int & _x, int & _y, int & _w, int & _h)
     return true;
 }
 
+
+/**
+ * Return true if the value begin with 'mouse'
+ * @param _value is the value to test
+ * @return true if _value begin with mouse
+ */
+bool Object::beginWithMouse(const std::string & _value)
+{
+    return (_value.size()>=5 && _value[0]=='m' && _value[1]=='o' && _value[2]=='u' && _value[3]=='s' && _value[4]=='e');
+}
+
 /**
  * Handle the mouseEvent
  * @param _timestampInMilliSeconds is the current timestamp
@@ -233,7 +244,7 @@ bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state
 
     if (_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h)
     {
-        if (getStyle()->getDisplay())
+        if (getStyle()->getDisplay() && beginWithMouse(getFashionId()))
         {
             // CHANGE THE FASHION IF NECESSARY
             std::string newFashionId = _state?"mouseclick":"mouseover";

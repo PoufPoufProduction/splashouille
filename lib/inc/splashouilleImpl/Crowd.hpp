@@ -140,8 +140,9 @@ public:
      * @param _listener is the callback listener
      * @param _tag is the requested tag object (all objects if empty)
      * @param _ascendant is true for an z-index ascendant browsing (from farest to closest)
+     * @param _user is a user parameter forwarded to the callback
      */
-    void forEach(Listener * _listener, const std::string & _tag = "", bool _ascendant = true) const;
+    void forEach(Listener * _listener, const std::string & _tag = "", bool _ascendant = true, int _user = 0) const;
 
     /**
      * Update the current crowd

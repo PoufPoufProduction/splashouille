@@ -32,6 +32,14 @@ class Crowd;
  */
 class Object : virtual public splashouille::Object
 {
+private:
+    /**
+     * Return true if the value begin with 'mouse'
+     * @param _value is the value to test
+     * @return true if _value begin with mouse
+     */
+    bool beginWithMouse(const std::string & _value);
+
 protected:
     inline int                                  min(int nX, int nY) { return nX > nY ? nY : nX; }
     typedef std::map<std::string, Fashion*>     FashionMap;
@@ -129,6 +137,12 @@ public:
      * @return the fashion
      */
     splashouille::Fashion *  getFashion();
+
+    /**
+     * Get the current fashion id
+     * @return the fashion id as string
+     */
+    const std::string & getFashionId() { return fashionId; }
 
     /**
      * Get the style

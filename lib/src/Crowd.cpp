@@ -292,7 +292,7 @@ bool Crowd::mouseEvent(int _timestampInMilliSeconds, int _x, int _y , int _state
         int ts, x, y, state;
     public:
         MouseEvent(int _ts, int _x, int _y , int _state):ts(_ts),x(_x),y(_y),state(_state) {}
-        bool onObject(splashouille::Object * _object)
+        bool onObject(splashouille::Object * _object, int _user UNUSED)
         {
             bool ret = (_object==Engine::mouse);
             if (!ret)
@@ -320,7 +320,7 @@ bool Crowd::mouseEvent(int _timestampInMilliSeconds, int _x, int _y , int _state
  * @param _tag is the requested tag object (all objects if empty)
  * @param _ascendant is true for an z-index ascendant browsing (from farest to closest)
  */
-void Crowd::forEach(Listener * _listener, const std::string & _tag, bool _ascendant) const
+void Crowd::forEach(Listener * _listener, const std::string & _tag, bool _ascendant, int _user) const
 {
     bool rc = true;
     if (_tag.size())
@@ -334,7 +334,7 @@ void Crowd::forEach(Listener * _listener, const std::string & _tag, bool _ascend
             {
                 for (std::list<Object*>::const_iterator it=objects->begin(); rc && it!=objects->end(); it++)
                 {
-                    rc = _listener->onObject(*it);
+                    rc = _listener->onObject(*it, _user);
                 }
             }
             else
@@ -343,7 +343,7 @@ void Crowd::forEach(Listener * _listener, const std::string & _tag, bool _ascend
                 {
                     std::list<Object*>::const_iterator prevIt = it;
                     prevIt--;
-                    rc = _listener->onObject(*prevIt);
+                    rc = _listener->onObject(*prevIt, _user);
                 }
             }
         }
@@ -393,7 +393,7 @@ void Crowd::forEach(Listener * _listener, const std::string & _tag, bool _ascend
             bool tagNotEmpty = true;
             while ( rc && tagNotEmpty && CMP((*((*tags.begin()).first))->getZIndex(),nextZIndex,_ascendant) )
             {
-                if ( (rc = _listener->onObject(*((*tags.begin()).first))))
+                if ( (rc = _listener->onObject(*((*tags.begin()).first), _user)))
                 {
                     if ((*tags.begin()).first==(*tags.begin()).second)  { tagNotEmpty = false; }
                     else {
@@ -446,7 +446,11 @@ void Crowd::render(SDL_Surface * _surface, SDL_Rect * _offset)
             SDL_Rect *      offset;
         public:
         Render(SDL_Surface * _surface, SDL_Rect * _offset):surface(_surface), offset(_offset) {}
-        bool onObject(splashouille::Object * _object) { dynamic_cast<Object*>(_object)->render(surface, offset); return true; }
+        bool onObject(splashouille::Object * _object, int _user UNUSED)
+        {
+            dynamic_cast<Object*>(_object)->render(surface, offset);
+            return true;
+        }
     };
     Render  renderListener(_surface, _offset);
     forEach(&renderListener);

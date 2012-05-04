@@ -48,7 +48,7 @@ public:
          * @param _object is an object of the crowd
          * @return false for ending the current process
          */
-        virtual bool onObject(splashouille::Object * _object UNUSED) { return true; }
+        virtual bool onObject(splashouille::Object * _object UNUSED, int _user UNUSED ) { return true; }
     };
 
     /**
@@ -119,8 +119,9 @@ public:
      * @param _listener is the callback listener
      * @param _tag is the requested tag object (all objects if empty)
      * @param _ascendant is true for an z-index ascendant browsing (from farest to closest)
+     * @param _user is a user parameter forwarded to the callback
      */
-    virtual void forEach(Listener * _listener, const std::string & _tag = "", bool _ascendant = true ) const = 0;
+    virtual void forEach(Listener * _listener, const std::string & _tag = "", bool _ascendant = true, int _user = 0 ) const = 0;
 
     /**
      * Clear the crowd: remove objects from the crowd

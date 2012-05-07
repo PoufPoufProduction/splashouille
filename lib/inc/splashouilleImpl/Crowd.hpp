@@ -165,6 +165,14 @@ public:
     void clear(const std::string & _tag = "");
 
     /**
+     * Change the current fashion
+     * @param _fashionId is the fashion Id as String
+     * @param _tag is the requested tag object (all objects if empty)
+     * @return true if the fashion is found
+     */
+    void changeFashion(const std::string & _fashionId, const std::string & _tag = "");
+
+    /**
      * Forward the callback
      * @return true
      */

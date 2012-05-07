@@ -32,8 +32,8 @@ class Style
 {
 public:
     enum Property { __display=0,        __left,             __top,              __width,            __height,
-                    __backgroundColor,  __position,         __opacity,          __relativeleft,     __relativetop,
-                    __last
+                    __backgroundColor,  __positionX,        __positionY,        __opacity,          __relativeleft,
+                    __relativetop,      __last
                   };
 
 
@@ -107,6 +107,8 @@ public:
     virtual void        setWidth(float _width) = 0;
     virtual void        setHeight(float _height) = 0;
     virtual void        setBackgroundColor(int _red, int _green, int _blue) = 0;
+    virtual void        setPositionX(float _x) = 0;
+    virtual void        setPositionY(float _y) = 0;
     virtual void        setPosition(float _x, float _y) = 0;
     virtual void        setOpacity(int _opacity) = 0;
     virtual void        setDisplay(bool _display) = 0;

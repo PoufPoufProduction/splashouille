@@ -39,7 +39,7 @@ public:
      * THE EVENT TYPE
 @verbatim
 none                not really used
-create              create a new object and insert it into the current animation crowd
+insert              insert a new object into the current animation crowd
 copy                copy an object from an older one and insert it into the current animation crowd
 pause               pause the current animation
 moveto              update the current animation timestamp
@@ -49,7 +49,7 @@ changefashion       change the fashion of an object
 state               change the state variable of an object
 @endverbatim
      */
-    enum Type       { none = 0, create, copy, close, pause, moveto, changetimeline, clearcrowd, changefashion, state };
+    enum Type       { none = 0, insert, copy, close, pause, moveto, changetimeline, clearcrowd, changefashion, state };
 public:
     /** @return the event type */
     virtual Type getType() = 0;

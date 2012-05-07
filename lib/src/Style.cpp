@@ -62,13 +62,12 @@ void Style::import(libconfig::Setting & _setting)
     if (_setting.exists(STYLE_POSITION))
     {
         for (int i=0; i<2; i++) position[i] = (int)_setting[STYLE_POSITION][i];
-        bitmap|=(1<<__position);
+        bitmap|=(1<<__positionX) | (1<<__positionY);
     }
     else
     {
-        //deprecated
-        if (_setting.lookupValue(STYLE_POSITION_X, value))                { position[0] = value; bitmap|=(1<<__position); }
-        if (_setting.lookupValue(STYLE_POSITION_Y, value))                { position[1] = value; bitmap|=(1<<__position); }
+        if (_setting.lookupValue(STYLE_POSITION_X, value))                { position[0] = value; bitmap|=(1<<__positionX); }
+        if (_setting.lookupValue(STYLE_POSITION_Y, value))                { position[1] = value; bitmap|=(1<<__positionY); }
     }
 
 }
@@ -147,12 +146,9 @@ void Style::add(const splashouille::Style * _style)
             setBackgroundColor(red, green, blue);
         }
 
-        if (_style->getBitmap()&(1<<__position))
-        {
-            float p[2];
-            _style->getPosition(p[0], p[1]);
-            setPosition(p[0], p[1]);
-        }
+        float p[2]; _style->getPosition(p[0], p[1]);
+        if (_style->getBitmap()&(1<<__positionX))   {   setPositionX    (p[0]); }
+        if (_style->getBitmap()&(1<<__positionY))   {   setPositionY    (p[1]); }
 
         bitmap  |= _style->getBitmap();
     }
@@ -184,13 +180,9 @@ void Style::mix(const splashouille::Style * _style, float _ratio)
             setBackgroundColor(rgb[0], rgb[1], rgb[2]);
         }
 
-        if ( both&(1<<__position) )
-        {
-            float p[2];
-            _style->getPosition(p[0], p[1]);
-            for (int i=0; i<2; i++) { p[i] = mix(position[i], p[i], _ratio); }
-            setPosition(p[0], p[1]);
-        }
+        float p[2]; _style->getPosition(p[0], p[1]);
+        if ( both&(1<<__positionX) )    setPositionX    ( mix(position[0], p[0], _ratio) );
+        if ( both&(1<<__positionY) )    setPositionY    ( mix(position[1], p[1], _ratio) );
 
         bitmap  |= _style->getBitmap();
     }
@@ -239,7 +231,7 @@ void Style::log(int _rank) const
     {
         std::cout<<offset<<".bg       : ("<<backgroundColor[0]<<","<<backgroundColor[1]<<","<<backgroundColor[2]<<")"<<std::endl;
     }
-    if (bitmap&(1<<__position))
+    if ((bitmap&(1<<__positionX)) || (bitmap&(1<<__positionY)))
     {
         std::cout<<offset<<".position : ("<<position[0]<<","<<position[1]<<")"<<std::endl;
     }

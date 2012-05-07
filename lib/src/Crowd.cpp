@@ -521,8 +521,37 @@ void Crowd::clear(const std::string & _tag)
         std::cout<<std::setw(STD_LABEL)<<std::left<<"Crowd::clear"<<" (animation: "<<animation->getId()<<
             ") (tag: "<<_tag<<")"<<std::endl;
     }
-
 }
+
+/**
+ * Change the current fashion
+ * @param _fashionId is the fashion Id as String
+ * @param _tag is the requested tag object (all objects if empty)
+ * @return true if the fashion is found
+ */
+void Crowd::changeFashion(const std::string & _fashionId, const std::string & _tag)
+{
+    if (_tag.size())
+    {
+        std::map<std::string, std::list<Object*>*>::iterator itTag = crowd.find(_tag);
+        if (itTag!=crowd.end())
+        {
+            std::list<Object*> *                        objects     = itTag->second;
+            for (std::list<Object*>::iterator it=objects->begin(); it!=objects->end(); it++)
+            {
+                (*it)->changeFashion(_fashionId);
+            }
+        }
+    }
+    else
+    {
+        for (std::map<std::string, Object *>::iterator it = library.begin(); it!=library.end(); it++)
+        {
+            (it->second)->changeFashion(_fashionId);
+        }
+    }
+}
+
 
 /**
  * Forward the callback

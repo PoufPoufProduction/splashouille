@@ -74,9 +74,9 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
     if (_setting.exists(EVENT_ID))  { _setting.lookupValue(EVENT_ID, id); }
     else                            { char m[128]; snprintf(m, 128, "event%05d", eventCount++); id.assign(m); }
 
-    if (!typeStr.compare(EVENT_TYPE_CREATE) )
+    if (!typeStr.compare(EVENT_TYPE_INSERT) )
     {
-        type = create;
+        type = insert;
         object = _library->createObject(_setting);
         objectId = object->getId();
         objectIds.push_back(objectId);
@@ -149,6 +149,7 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
         _setting.lookupValue(EVENT_VALUE, valueStr);
         if (_setting.exists(EVENT_OBJECTID))
         {
+            option = false;
             libconfig::Setting & setting = _setting[EVENT_OBJECTID];
             if (setting.getType()== libconfig::Setting::TypeString)
             {
@@ -164,6 +165,12 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
                     objectIds.push_back(objectId);
                 }
             }
+        }
+        else if (_setting.exists(EVENT_TAG))
+        {
+            option = true;
+            _setting.lookupValue(EVENT_TAG, objectId);
+            objectIds.push_back(objectId);
         }
     }
     else if (!typeStr.compare(EVENT_TYPE_STATE) )
@@ -202,7 +209,7 @@ bool Event::run(int _timestamp)
         // Handle the event
         switch(type)
         {
-        case create:
+        case insert:
         case copy:              crowd->insertObject(_timestamp, object); break;
         case close:             for (unsigned int i=0;i<objectIds.size();i++) { crowd->dropObject(objectIds[i]); } break;
         case moveto:            timeline->move(_timestamp, value); ret = false; break;
@@ -222,8 +229,15 @@ bool Event::run(int _timestamp)
                                 {
                                     for (unsigned int i=0;i<objectIds.size();i++)
                                     {
-                                        splashouille::Object * o = animation->getLibrary()->getObjectById(objectIds[i]);
-                                        if (o) { o->changeFashion(valueStr); }
+                                        if (option)
+                                        {
+                                            animation->getCrowd()->changeFashion(valueStr, objectIds[i]);
+                                        }
+                                        else
+                                        {
+                                            splashouille::Object * o = animation->getLibrary()->getObjectById(objectIds[i]);
+                                            if (o) { o->changeFashion(valueStr); }
+                                        }
                                     }
                                 }
                                 else

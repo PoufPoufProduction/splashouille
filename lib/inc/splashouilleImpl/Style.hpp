@@ -139,10 +139,9 @@ public:
                       changed|=(((backgroundColor[0]!=_red)|(backgroundColor[1]!=_green)|(backgroundColor[2]!=_blue))<<__backgroundColor);
                       backgroundColor[0] = _red; backgroundColor[1] = _green; backgroundColor[2] = _blue;
                       bitmap|=(1<<__backgroundColor); }
-    void        setPosition(float _x, float _y)
-                    { changed|= ((d(position[0],_x)|d(position[1],_y))<<__position);
-                      position[0]=_x; position[1]=_y;
-                      bitmap|=(1<<__position); }
+    void        setPositionX(float _x)          { changed|=(d(position[0],_x)<<__positionX); position[0]=_x; bitmap|=(1<<__positionX); }
+    void        setPositionY(float _y)          { changed|=(d(position[1],_y)<<__positionY); position[1]=_y; bitmap|=(1<<__positionY); }
+    void        setPosition(float _x, float _y) { setPositionX(_x); setPositionY(_y); }
     void        setOpacity(int _opacity)
                     { _opacity = (_opacity<0)?0:((_opacity>255)?255:_opacity);
                       changed|=(d(opacity,_opacity)<<__opacity); opacity = _opacity; bitmap|=(1<<__opacity); }

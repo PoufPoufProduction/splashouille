@@ -129,6 +129,14 @@ public:
      */
     virtual void clear(const std::string & _tag = "") = 0;
 
+    /**
+     * Change the current fashion
+     * @param _fashionId is the fashion Id as String
+     * @param _tag is the requested tag object (all objects if empty)
+     * @return true if the fashion is found
+     */
+    virtual void changeFashion(const std::string & _fashionId, const std::string & _tag = "") = 0;
+
 };
 
 }

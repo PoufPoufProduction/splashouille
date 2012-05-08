@@ -313,6 +313,7 @@ bool Engine::run(SDL_Surface * _surface)
     Uint16          mouseY          = 0;
     int             mouseState      = 0;
     bool            rc;
+    int             delay           = fps?1000/fps:1;
 
     // Save the background
     background      = SDL_DisplayFormat(_surface);
@@ -390,7 +391,7 @@ bool Engine::run(SDL_Surface * _surface)
         }
 
         // THE MILLISECOND IS THE LIMIT OF THE SDL_GETTICKS()
-        if (!onPause && now!=lastNow)
+        if (!onPause && now>=lastNow+delay)
         {
             // FORWARD THE MOUSE EVENT
             if (!noMouse) { mouseEvent(now-begin, event.button.x, event.button.y, mouseState); }
@@ -432,18 +433,8 @@ bool Engine::run(SDL_Surface * _surface)
                 if (_surface->flags&SDL_DOUBLEBUF) { flip(_surface); } else flip(_surface);
             }
 
-            int end = SDL_GetTicks();
-            if (fps)
-            {
-                int delay = (1000/fps)-(end-now);
-                if (delay>0) { SDL_Delay(delay); }
-            }
             frame++; frameSec++;
             clear(); // TODO: move this in Animation::render
-        }
-        else
-        {
-            if (fps) { SDL_Delay(1000/fps); }
         }
 
         now = SDL_GetTicks();

@@ -141,7 +141,7 @@ Sound::~Sound()
 /**
  * crowd special callbacks
  */
-bool Sound::inCrowd()
+bool Sound::inCrowd(splashouilleImpl::Crowd * _crowd UNUSED)
 {
     if (isChunk)
     {

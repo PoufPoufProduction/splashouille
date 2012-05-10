@@ -97,7 +97,7 @@ public:
     /**
      * crowd special callbacks
      */
-    bool inCrowd();
+    bool inCrowd(splashouilleImpl::Crowd * _crowd);
     bool outCrowd();
 
 

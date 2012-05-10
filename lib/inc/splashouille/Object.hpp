@@ -181,6 +181,7 @@ public:
     virtual bool isImage() const = 0;
     virtual bool isAnimation() const = 0;
     virtual bool isSound() const = 0;
+    virtual bool isMap() const = 0;
     virtual bool isEngine() const = 0;
 };
 

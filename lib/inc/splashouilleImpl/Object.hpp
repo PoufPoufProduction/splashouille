@@ -98,13 +98,18 @@ public:
     const std::string & getTag() const { return tag; }
 
     /**
+     * set the object tag (to call before inserting in the crowd)
+     */
+    void setTag(const std::string & _tag) { tag = _tag; }
+
+    /**
      * get the z-index
      * @return the z-index as integer
      */
     int getZIndex() const { return zIndex; }
 
     /**
-     * set the z-index (has to only be called by the crowd)
+     * set the z-index (to call before inserting in the crowd)
      */
     void setZIndex(int _zIndex) { zIndex = _zIndex; }
 
@@ -235,7 +240,7 @@ public:
     /**
      * crowd events special callbacks
      */
-    virtual bool inCrowd() { return true; }
+    virtual bool inCrowd(splashouilleImpl::Crowd * _crowd UNUSED) { return true; }
     virtual bool outCrowd() { return true; }
 
     /**
@@ -245,6 +250,7 @@ public:
     virtual bool isImage() const        { return false; }
     virtual bool isAnimation() const    { return false; }
     virtual bool isSound() const        { return false; }
+    virtual bool isMap() const          { return false; }
     virtual bool isEngine() const       { return false; }
 
     /**

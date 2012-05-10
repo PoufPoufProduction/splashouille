@@ -33,6 +33,7 @@ class Solid;
 class Image;
 class Animation;
 class Sound;
+class Map;
 
 /**
  * The main generic class
@@ -72,6 +73,7 @@ public:
     virtual splashouille::Image *           createImage(const std::string & _id) = 0;
     virtual splashouille::Animation *       createAnimation(const std::string & _id) = 0;
     virtual splashouille::Sound *           createSound(const std::string & _id) = 0;
+    virtual splashouille::Map *             createMap(const std::string & _id) = 0;
 
     /**
      * Copy an object from an existing object
@@ -102,6 +104,7 @@ public:
     virtual splashouille::Image *           getImageById(const std::string & _id) const = 0;
     virtual splashouille::Animation *       getAnimationById(const std::string & _id) const = 0;
     virtual splashouille::Sound *           getSoundById(const std::string & _id) const = 0;
+    virtual splashouille::Map *             getMapById(const std::string & _id) const = 0;
 
     /**
      * set the library listener

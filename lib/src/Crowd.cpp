@@ -74,7 +74,7 @@ bool Crowd::insertObject(int _timestamp, splashouille::Object * _object)
     bool        rc = (object && (library.find(object->getId())==library.end()));
     if (rc)
     {
-        if (object->inCrowd())
+        if (object->inCrowd(this))
         {
             // Set the object initial timestamp in the crowd
             object->setInitialTimestamp(_timestamp);

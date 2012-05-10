@@ -23,6 +23,7 @@ SPLASHOUILLE.  If not, see http://www.gnu.org/licenses/
 #include <splashouilleImpl/Image.hpp>
 #include <splashouilleImpl/Animation.hpp>
 #include <splashouilleImpl/Sound.hpp>
+#include <splashouilleImpl/Map.hpp>
 #include <splashouilleImpl/Fashion.hpp>
 #include <splashouilleImpl/Style.hpp>
 #include <libconfig.h++>
@@ -87,7 +88,8 @@ splashouille::Object * Library::createObject(libconfig::Setting & _setting)
             if (!type.compare(TYPE_SOLID))      { ret = new splashouilleImpl::Solid(id, _setting); }            else
             if (!type.compare(TYPE_IMAGE))      { ret = new splashouilleImpl::Image(id, _setting); }            else
             if (!type.compare(TYPE_ANIMATION))  { ret = new splashouilleImpl::Animation(id, _setting, this); }  else
-            if (!type.compare(TYPE_SOUND))      { ret = new splashouilleImpl::Sound(id, _setting); }
+            if (!type.compare(TYPE_SOUND))      { ret = new splashouilleImpl::Sound(id, _setting); }            else
+            if (!type.compare(TYPE_MAP))        { ret = new splashouilleImpl::Map(id, _setting, this); }
 
             if (ret) { insertObject(id, ret); }
         }
@@ -109,7 +111,8 @@ splashouille::Object * Library::createObject(const std::string & _id, const std:
     if (!_type.compare(TYPE_SOLID))     { ret = createSolid(_id); }     else
     if (!_type.compare(TYPE_IMAGE))     { ret = createImage(_id); }     else
     if (!_type.compare(TYPE_ANIMATION)) { ret = createAnimation(_id); } else
-    if (!_type.compare(TYPE_SOUND))     { ret = createSound(_id); }
+    if (!_type.compare(TYPE_SOUND))     { ret = createSound(_id); } else
+    if (!_type.compare(TYPE_MAP))       { ret = createMap(_id); }
     return ret;
 }
 
@@ -170,6 +173,19 @@ splashouille::Sound * Library::createSound(const std::string & _id)
     return ret;
 }
 
+splashouille::Map * Library::createMap(const std::string & _id)
+{
+    splashouille::Map * ret = new splashouilleImpl::Map(_id, this);
+    if (ret) { insertObject(_id, ret); }
+
+    if (Engine::debug)
+    {
+        std::cout<<std::setw(STD_LABEL)<<std::left<<"Library::createMap"
+             <<" (type: "<<TYPE_MAP<<") (id: "<<_id<<") (return: "<<(ret?"OK":"KO")<<")"<<std::endl;
+    }
+
+    return ret;
+}
 
 /**
  * Copy an object from an existing object
@@ -201,6 +217,10 @@ splashouille::Object *  Library::copyObject(const std::string & _parent, const s
             else if (! parent->getType().compare(TYPE_SOUND))
             {
                 ret = new splashouilleImpl::Sound(_id, dynamic_cast<splashouilleImpl::Sound*>(parent));
+            }
+            else if (! parent->getType().compare(TYPE_MAP))
+            {
+                ret = new splashouilleImpl::Map(_id, dynamic_cast<splashouilleImpl::Map*>(parent), this);
             }
 
             if (ret) { insertObject(_id, ret); }
@@ -241,6 +261,7 @@ bool Library::deleteObject(const std::map<std::string, splashouille::Object *>::
             if (obj->isImage())     { delete(dynamic_cast<splashouilleImpl::Image*>(obj)); }    else
             if (obj->isAnimation()) { delete(dynamic_cast<splashouilleImpl::Animation*>(obj));} else
             if (obj->isSound())     { delete(dynamic_cast<splashouilleImpl::Sound*>(obj)); }    else
+            if (obj->isMap())       { delete(dynamic_cast<splashouilleImpl::Map*>(obj)); }      else
                                     { ret = false; }
         }
     }
@@ -329,7 +350,13 @@ splashouille::Sound * Library::getSoundById(const std::string & _id) const
     if (obj && !obj->getType().compare(TYPE_SOUND)) { ret = dynamic_cast<splashouille::Sound*>(obj); }
     return ret;
 }
-
+splashouille::Map * Library::getMapById(const std::string & _id) const
+{
+    splashouille::Map *         ret = 0;
+    splashouille::Object *      obj = getObjectById(_id);
+    if (obj && !obj->getType().compare(TYPE_MAP)) { ret = dynamic_cast<splashouille::Map*>(obj); }
+    return ret;
+}
 
 /**
  * Log the library to the standard output

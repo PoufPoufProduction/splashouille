@@ -74,6 +74,7 @@ public:
     splashouille::Image *        createImage(const std::string & _id);
     splashouille::Animation *    createAnimation(const std::string & _id);
     splashouille::Sound *        createSound(const std::string & _id);
+    splashouille::Map *          createMap(const std::string & _id);
 
     /**
      * Copy an object from an existing object
@@ -103,6 +104,7 @@ public:
     splashouille::Image *                   getImageById(const std::string & _id) const;
     splashouille::Animation *               getAnimationById(const std::string & _id) const;
     splashouille::Sound *                   getSoundById(const std::string & _id) const;
+    splashouille::Map *                     getMapById(const std::string & _id) const;
     splashouille::Object *                  getObjectById(const std::string& _id) const
     {
         std::map<std::string, splashouille::Object *>::const_iterator it = library.find(_id);

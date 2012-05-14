@@ -394,7 +394,7 @@ bool Engine::run(SDL_Surface * _surface)
         if (!onPause && now>=lastNow+delay)
         {
             // FORWARD THE MOUSE EVENT
-            if (!noMouse) { mouseEvent(now-begin, event.button.x, event.button.y, mouseState); }
+            if (!noMouse) { mouseEvent(now-begin, event.button.x, event.button.y, true, mouseState); }
 
             // UPDATE THE ELEMENTS
             lastNow = now;

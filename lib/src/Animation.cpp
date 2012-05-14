@@ -212,20 +212,24 @@ bool Animation::update(int _timestamp)
  * @param _timestampInMilliSeconds is the current timestamp
  * @param _x is the mouse position on x-axis
  * @param _y is the mouse position on y-axis
+ * @param _checkOver false when object is over
  * @param _state is the button action (if any)
+ * @return true for forwarding the event to the below objects
  */
-bool Animation::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state)
+bool Animation::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, bool _checkOver, int _state)
 {
-    bool ret = true;
+    bool children = true;
+    bool animation = true;
+    bool nowOver = (_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h);
 
-    Object::mouseEvent(_timestampInMilliSeconds, _x, _y, _state);
-    if ((_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h) ||
-        (mouseOver) )
+    if ((nowOver) || (mouseOver) )
     {
-        ret = crowd->mouseEvent(_timestampInMilliSeconds, _x-position->x, _y-position->y, _state);
+        children = crowd->mouseEvent(_timestampInMilliSeconds, _x-position->x, _y-position->y, nowOver & _checkOver, _state);
     }
 
-    return ret;
+    animation = Object::mouseEvent(_timestampInMilliSeconds, _x, _y, _checkOver, _state);
+
+    return isStatic()?children:animation;
 }
 
 /**

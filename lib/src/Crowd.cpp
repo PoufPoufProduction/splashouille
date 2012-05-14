@@ -278,40 +278,45 @@ void Crowd::log(int _rank) const
     }
 }
 
+
 /**
  * Handle the mouseEvent
+ * @param _timestampInMilliSeconds is the current timestamp
  * @param _x is the mouse position on x-axis
  * @param _y is the mouse position on y-axis
+ * @param _checkOver false when object is over
  * @param _state is the button action (if any)
+ * @return true for forwarding the event to the below objects
  */
-bool Crowd::mouseEvent(int _timestampInMilliSeconds, int _x, int _y , int _state)
+bool Crowd::mouseEvent(int _timestampInMilliSeconds, int _x, int _y , bool _checkOver, int _state)
 {
     class MouseEvent : public Listener
     {
     private:
         int ts, x, y, state;
     public:
-        MouseEvent(int _ts, int _x, int _y , int _state):ts(_ts),x(_x),y(_y),state(_state) {}
+        bool checkOver;
+        MouseEvent(int _ts, int _x, int _y, bool _checkOver, int _state):
+            ts(_ts),x(_x),y(_y),state(_state), checkOver(_checkOver) {}
         bool onObject(splashouille::Object * _object, int _user UNUSED)
         {
-            bool ret = (_object==Engine::mouse);
-            if (!ret)
+            if (_object!=Engine::mouse)
             {
                 if (_object->isAnimation())
                 {
-                    ret = dynamic_cast<Animation*>(_object)->mouseEvent(ts, x, y,state);
+                    checkOver &= dynamic_cast<Animation*>(_object)->mouseEvent(ts, x, y, checkOver, state);
                 }
                 else
                 {
-                    ret = dynamic_cast<Object*>(_object)->mouseEvent(ts, x, y,state);
+                    checkOver &= dynamic_cast<Object*>(_object)->mouseEvent(ts, x, y, checkOver, state);
                 }
             }
-            return ret;
+            return true;
         }
     };
-    MouseEvent mouseEventListener(_timestampInMilliSeconds, _x, _y, _state);
+    MouseEvent mouseEventListener(_timestampInMilliSeconds, _x, _y, _checkOver, _state);
     forEach(&mouseEventListener, "", false);
-    return true;
+    return mouseEventListener.checkOver;
 }
 
 /**

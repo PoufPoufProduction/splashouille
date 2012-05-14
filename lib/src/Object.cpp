@@ -236,14 +236,18 @@ bool Object::beginWithMouse(const std::string & _value)
  * @param _timestampInMilliSeconds is the current timestamp
  * @param _x is the mouse position on x-axis
  * @param _y is the mouse position on y-axis
+ * @param _checkOver false when object is over
  * @param _state is the button action (if any)
+ * @return true for forwarding the event to the below objects
  */
-bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state)
+bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, bool _checkOver, int _state)
 {
     bool ret = true;
 
-    if (_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h)
+    if (_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h && _checkOver)
     {
+        ret = false;
+
         if (getStyle()->getDisplay() && beginWithMouse(getFashionId()))
         {
             // CHANGE THE FASHION IF NECESSARY
@@ -258,14 +262,14 @@ bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state
                     else            { ret = listener->onMouseOver(_timestampInMilliSeconds, this); }
                 }
             }
-            mouseOver = true;
 
-            // STOP THE EVENT ?
-            ret &= (getStyle()->getOpacity()!=255);
+            // THE TRANSPARENCY FORWARDS THE EVENT
+            ret |= (getStyle()->getOpacity()!=255);
         }
+        mouseOver = true;
     }
     else
-    if (mouseOver)
+    if (mouseOver || !_checkOver )
     {
         mouseOver = false;
         if (beginWithMouse(getFashionId())) { changeFashion("mouseout"); }

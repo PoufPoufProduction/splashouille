@@ -129,11 +129,14 @@ public:
 
     /**
      * Handle the mouseEvent
+     * @param _timestampInMilliSeconds is the current timestamp
      * @param _x is the mouse position on x-axis
      * @param _y is the mouse position on y-axis
+     * @param _checkOver false when object is over
      * @param _state is the button action (if any)
+     * @return true for forwarding the event to the below objects
      */
-    bool mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state = 0);
+    bool mouseEvent(int _timestampInMilliSeconds, int _x, int _y, bool _checkOver, int _state = 0);
 
     /**
      * Parse the crowd

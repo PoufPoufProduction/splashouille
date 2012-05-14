@@ -246,27 +246,30 @@ bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, bool _chec
 
     if (_x>=position->x && _x<=position->x+position->w && _y>=position->y && _y<=position->y+position->h && _checkOver)
     {
-        ret = false;
-
-        if (getStyle()->getDisplay() && beginWithMouse(getFashionId()))
+        if (getStyle()->getDisplay())
         {
-            // CHANGE THE FASHION IF NECESSARY
-            std::string newFashionId = _state?"mouseclick":"mouseover";
-            if (newFashionId.compare(fashionId))
-            {
-                bool release = (!fashionId.compare("mouseclick"));
-                changeFashion(newFashionId);
-                if (listener)
-                {
-                    if (release)    { ret = listener->onMouseClick(_timestampInMilliSeconds, this, 0); }
-                    else            { ret = listener->onMouseOver(_timestampInMilliSeconds, this); }
-                }
-            }
+            ret = false;
 
-            // THE TRANSPARENCY FORWARDS THE EVENT
-            ret |= (getStyle()->getOpacity()!=255);
+            if (beginWithMouse(getFashionId()))
+            {
+                // CHANGE THE FASHION IF NECESSARY
+                std::string newFashionId = _state?"mouseclick":"mouseover";
+                if (newFashionId.compare(fashionId))
+                {
+                    bool release = (!fashionId.compare("mouseclick"));
+                    changeFashion(newFashionId);
+                    if (listener)
+                    {
+                        if (release)    { ret = listener->onMouseClick(_timestampInMilliSeconds, this, 0); }
+                        else            { ret = listener->onMouseOver(_timestampInMilliSeconds, this); }
+                    }
+                }
+
+                // THE TRANSPARENCY FORWARDS THE EVENT
+                ret |= (getStyle()->getOpacity()!=255);
+            }
+            mouseOver = true;
         }
-        mouseOver = true;
     }
     else
     if (mouseOver || !_checkOver )

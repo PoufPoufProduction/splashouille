@@ -141,7 +141,8 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
     else if (!typeStr.compare(EVENT_TYPE_CLEAR) )
     {
         type = clearcrowd;
-        if (_setting.exists(EVENT_VALUE)) {  _setting.lookupValue(EVENT_VALUE, valueStr); }
+        if (_setting.exists(EVENT_VALUE))   {  _setting.lookupValue(EVENT_VALUE, valueStr); } else
+        if (_setting.exists(EVENT_TAG))     {  _setting.lookupValue(EVENT_TAG, valueStr); }
     }
     else if (!typeStr.compare(EVENT_TYPE_FASHION) )
     {

@@ -268,7 +268,7 @@ bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, int _state
     if (mouseOver)
     {
         mouseOver = false;
-        changeFashion("mouseout");
+        if (beginWithMouse(getFashionId())) { changeFashion("mouseout"); }
         if (listener) { listener->onMouseOut(_timestampInMilliSeconds, this); }
     }
     return ret;

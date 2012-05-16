@@ -44,6 +44,7 @@ private:
     float       position[2];                        // The position offset
     bool        display;                            // The display state
     int         opacity;                            // The opacity;
+    int         user;                               // The user attributes
 
     /**
      * Mix two values regarding their ratio
@@ -122,6 +123,7 @@ public:
     void        getBackgroundColor(int & _red, int & _green, int & _blue) const;
     void        getPosition(float & _x, float & _y) const;
     int         getOpacity() const              { return opacity; }
+    int         getUser() const                 { return user; }
 
     int         hasChangedSinceLastTime()       { int ret=changed; changed=0; return ret; }
     void        setLeft(float _left)            { changed|=(d(left,_left)<<__left); left = _left; bitmap|=(1<<__left); }
@@ -147,6 +149,7 @@ public:
                       changed|=(d(opacity,_opacity)<<__opacity); opacity = _opacity; bitmap|=(1<<__opacity); }
     void        setDisplay(bool _display)
                     { changed|=((_display!=display)<<__display); display=_display; bitmap|=(1<<__display); }
+    void        setUser(int _user)              { changed|=(d(user,_user)<<__user); user = _user; bitmap|=(1<<__user); }
 
 };
 

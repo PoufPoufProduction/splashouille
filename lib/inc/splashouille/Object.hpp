@@ -48,10 +48,12 @@ public:
     class Listener
     {
     public:
-        virtual void onShow         (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual void onMouseOut     (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) {}
-        virtual bool onMouseOver    (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED) { return true; }
-        virtual bool onMouseClick   (int _timestampInMilliSeconds UNUSED, splashouille::Object * _object UNUSED, int _state UNUSED)
+        virtual void onShow         (int _ts UNUSED, splashouille::Object * _object UNUSED) {}
+        virtual void onMouseOut     (int _ts UNUSED, splashouille::Object * _object UNUSED) {}
+        virtual bool onMouseOver    (int _ts UNUSED, splashouille::Object * _object UNUSED, int _x UNUSED, int _y UNUSED )
+                                    { return true; }
+        virtual bool onMouseClick   (int _ts UNUSED, splashouille::Object * _object UNUSED, int _x UNUSED, int _y UNUSED,
+                                     int _state UNUSED, bool _release UNUSED)
                                     { return true; }
 
         virtual void onHide         (splashouille::Object * _object UNUSED) {}
@@ -111,9 +113,10 @@ public:
     /**
      * Change the current fashion
      * @param _fashionId is the fashion Id as String
+     * @param _force is true than change fashion even if it is the same
      * @return true if the fashion is found
      */
-    virtual bool changeFashion(const std::string & _fashionId) = 0;
+    virtual bool changeFashion(const std::string & _fashionId, bool _force = false) = 0;
 
     /**
      * Get the position of the object

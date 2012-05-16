@@ -51,6 +51,7 @@ void Style::import(libconfig::Setting & _setting)
     if (_setting.lookupValue(STYLE_WIDTH, value))                       { width= value; bitmap|=(1<<__width); }
     if (_setting.lookupValue(STYLE_HEIGHT, value))                      { height=value; bitmap|=(1<<__height); }
     if (_setting.lookupValue(STYLE_OPACITY, opacity))                   { bitmap|=(1<<__opacity); }
+    if (_setting.lookupValue(STYLE_USER, user))                         { bitmap|=(1<<__user); }
     if (_setting.lookupValue(STYLE_DISPLAY, value))                     { display=(value); bitmap|=(1<<__display); }
 
     if (_setting.exists(STYLE_BACKGROUNDCOLOR))
@@ -82,6 +83,7 @@ void Style::reset()
     relativeLeft = relativeTop  = 0;
     display                     = true;
     opacity                     = 255;
+    user                        = 0;
     backgroundColor[0] = backgroundColor[1] = backgroundColor[2] = 0;
     position[0] = position[1]   = 0;
     touch();
@@ -113,6 +115,7 @@ void Style::copy(const splashouille::Style * _style)
         height              = _style->getHeight();
         display             = _style->getDisplay();
         opacity             = _style->getOpacity();
+        user                = _style->getUser();
 
         _style->getBackgroundColor(backgroundColor[0], backgroundColor[1], backgroundColor[2]);
         _style->getPosition(position[0], position[1]);
@@ -138,6 +141,7 @@ void Style::add(const splashouille::Style * _style)
         if (_style->getBitmap()&(1<<__height))      { setHeight         ( _style->getHeight()); }
         if (_style->getBitmap()&(1<<__display))     { setDisplay        ( _style->getDisplay()); }
         if (_style->getBitmap()&(1<<__opacity))     { setOpacity        ( _style->getOpacity()); }
+        if (_style->getBitmap()&(1<<__user))        { setUser           ( _style->getUser()); }
 
         if (_style->getBitmap()&(1<<__backgroundColor))
         {
@@ -171,6 +175,7 @@ void Style::mix(const splashouille::Style * _style, float _ratio)
         if ( both&(1<<__width) )        setWidth        ( mix(width, _style->getWidth(), _ratio) );
         if ( both&(1<<__height) )       setHeight       ( mix(height, _style->getHeight(),_ratio) );
         if ( both&(1<<__opacity) )      setOpacity      ( mix(opacity, _style->getOpacity(), _ratio) );
+        if ( both&(1<<__user) )         setUser         ( mix(user, _style->getUser(), _ratio) );
 
         if ( both&(1<<__backgroundColor) )
         {
@@ -205,6 +210,7 @@ int Style::compare(const splashouille::Style * _style) const
     if ( both&(1<<__width) )        ret |= (d(width, _style->getWidth())<<__width);
     if ( both&(1<<__height) )       ret |= (d(height, _style->getHeight())<<__height);
     if ( both&(1<<__opacity) )      ret |= (d(opacity, _style->getOpacity())<<__opacity);
+    if ( both&(1<<__user) )         ret |= (d(user, _style->getUser())<<__user);
     if ( both&(1<<__display) )      ret |= (d(display, _style->getDisplay())<<__display);
 
     return ret;
@@ -227,6 +233,7 @@ void Style::log(int _rank) const
     if (bitmap&(1<<__height))       { std::cout<<offset<<".heigh    : "<<height<<std::endl; }
     if (bitmap&(1<<__display))      { std::cout<<offset<<".display  : "<<display<<std::endl; }
     if (bitmap&(1<<__opacity))      { std::cout<<offset<<".opacity  : "<<opacity<<std::endl; }
+    if (bitmap&(1<<__user))         { std::cout<<offset<<".user     : "<<user<<std::endl; }
     if (bitmap&(1<<__backgroundColor))
     {
         std::cout<<offset<<".bg       : ("<<backgroundColor[0]<<","<<backgroundColor[1]<<","<<backgroundColor[2]<<")"<<std::endl;

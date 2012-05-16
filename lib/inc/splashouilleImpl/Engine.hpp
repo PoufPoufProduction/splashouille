@@ -31,7 +31,7 @@ class Engine : virtual public splashouille::Engine, virtual public splashouilleI
 public:
     static splashouille::Object *       mouse;          // The object as mouse pointer
     static int                          mouseOffset[2]; // The mouse offset
-    static bool                         noMouse;        // No mouse handling
+    static mouseModeEnum                mouseMode;      // The mouse mode
     static std::string                  locale;         // The locale value ["fr", "en"]
     static bool                         debug;          // Debug mode
 
@@ -70,14 +70,20 @@ public:
     bool                                isOnPause()                             { return onPause; }
     const std::string &                 getLocale()                             { return locale; }
     int                                 getProgress() const                     { return progress; }
+    splashouille::Object *              getMouse() const                        { return mouse; }
     void                                setDebug(bool _value = true)            { debug = _value; }
     void                                setLocale(const std::string & _locale)  { locale = _locale; }
     void                                setProgress(int _value=100)             { progress = _value; }
 
     /**
-     * No mouse handling
+     * Set the mouse mode
+     * @param _mode is the mouse mode
      */
-    void                                setNoMouse() { noMouse = true; mouse = 0; SDL_ShowCursor(SDL_DISABLE); }
+    static void setMouseMode(mouseModeEnum _mode)
+    {
+        mouseMode = _mode;
+        if (_mode==none || _mode==object) { SDL_ShowCursor(SDL_DISABLE); }
+    }
 
     /**
      * Import an animation from configuration file
@@ -93,9 +99,9 @@ public:
      * @param _offsetX is the x-offset of the cursor: 0 is the left side, 10 is the right side
      * @param _offsetY is the y-offset of the cursor: 0 is the top side, 10 is the bottom side
      */
-    void setMouse(splashouille::Object * _object, int _offsetX = 0, int _offsetY = 0)
+    static void setMouse(splashouille::Object * _object, int _offsetX = 0, int _offsetY = 0)
     {
-        mouse = _object; mouseOffset[0] = _offsetX; mouseOffset[1] = _offsetY; SDL_ShowCursor(SDL_DISABLE); noMouse = false;
+        mouse = _object; mouseOffset[0] = _offsetX; mouseOffset[1] = _offsetY; setMouseMode(object);
     }
 
     /**

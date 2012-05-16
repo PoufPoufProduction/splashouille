@@ -101,7 +101,7 @@ bool Object::import(libconfig::Setting & _setting)
     {
         std::string tmp;
         _setting.lookupValue(MOUSE, tmp);
-        Engine::mouse = this; SDL_ShowCursor(SDL_DISABLE);
+        Engine::setMouse(this);
         if (!tmp.compare(MOUSE_TOPLEFT))        { Engine::mouseOffset[0] = 0;  Engine::mouseOffset[1] = 0; } else
         if (!tmp.compare(MOUSE_TOP))            { Engine::mouseOffset[0] = 5;  Engine::mouseOffset[1] = 0; } else
         if (!tmp.compare(MOUSE_TOPRIGHT))       { Engine::mouseOffset[0] = 10; Engine::mouseOffset[1] = 0; } else
@@ -146,15 +146,16 @@ bool Object::import(libconfig::Setting & _setting)
 /**
  * Change the current fashion
  * @param _fashionId is the fashion Id as String
+ * @param _force is true than change fashion even if it is the same
  * @return true if the fashion is found
  */
-bool Object::changeFashion(const std::string & _fashionId)
+bool Object::changeFashion(const std::string & _fashionId, bool _force)
 {
     bool ret = false;
 
     for (FashionMap::iterator vIt=fashions.begin(); vIt!=fashions.end(); vIt++)
     {
-        if (!vIt->first.compare(_fashionId) && vIt->second!=fashion)
+        if (!vIt->first.compare(_fashionId) && (_force || vIt->second!=fashion))
         {
             ret = true;
             initialTimestamp = -1;
@@ -260,8 +261,10 @@ bool Object::mouseEvent(int _timestampInMilliSeconds, int _x, int _y, bool _chec
                     changeFashion(newFashionId);
                     if (listener)
                     {
-                        if (release)    { ret = listener->onMouseClick(_timestampInMilliSeconds, this, 0); }
-                        else            { ret = listener->onMouseOver(_timestampInMilliSeconds, this); }
+                        if (release || !newFashionId.compare("mouseclick"))
+                            { ret = listener->onMouseClick(_timestampInMilliSeconds, this, _x, _y, _state, release); }
+                        else
+                            { ret = listener->onMouseOver(_timestampInMilliSeconds, this, _x, _y); }
                     }
                 }
 

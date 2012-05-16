@@ -40,6 +40,11 @@ class Library;
 class Engine : virtual public Animation
 {
 public:
+    /** The mouse modes : none: no mouse at all, inactive: mouse is not hidden but inactive,
+     *  active: default windows manager mouse is active, object: a splashouille object is the mouse
+     */
+    enum mouseModeEnum { none = 0, inactive, active, object };
+
     /**
      * The animation listener class
      * Used for getting information and callback durin animation process
@@ -112,6 +117,20 @@ public:
      */
     static bool                             inter(const SDL_Rect * _first, const SDL_Rect * _second);
 
+    /**
+     * Set the mouse mode
+     * @param _mode is the mouse mode
+     */
+    static void setMouseMode(mouseModeEnum _mode);
+
+    /**
+     * Set the mouse pointer cursor (disable the noMouse value)
+     * @param _object is the object used as mouse pointer
+     * @param _offsetX is the x-offset of the cursor: 0 is the left side, 10 is the right side
+     * @param _offsetY is the y-offset of the cursor: 0 is the top side, 10 is the bottom side
+     */
+    static void setMouse(splashouille::Object * _object, int _offsetX = 0, int _offsetY = 0);
+
 public:
 
     /** Some accessors */
@@ -121,20 +140,8 @@ public:
     virtual void                            setLocale(const std::string & _locale) = 0;
     virtual const std::string &             getLocale() = 0;
     virtual int                             getProgress() const = 0;
+    virtual splashouille::Object *          getMouse() const = 0;
     virtual void                            setDebug(bool _value = true) = 0;
-
-    /**
-     * No mouse handling
-     */
-    virtual void setNoMouse() = 0;
-
-    /**
-     * Set the mouse pointer cursor (disable the noMouse value)
-     * @param _object is the object used as mouse pointer
-     * @param _offsetX is the x-offset of the cursor: 0 is the left side, 10 is the right side
-     * @param _offsetY is the y-offset of the cursor: 0 is the top side, 10 is the bottom side
-     */
-    virtual void setMouse(splashouille::Object * _object, int _offsetX = 0, int _offsetY = 0) = 0;
 
     /**
      * Import the engine from configuration file

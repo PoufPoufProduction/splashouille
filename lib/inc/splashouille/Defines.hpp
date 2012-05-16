@@ -57,6 +57,7 @@ SPLASHOUILLE.  If not, see http://www.gnu.org/licenses/
 #define STYLE_BACKGROUNDCOLOR       "background-color"
 #define STYLE_DISPLAY               "display"
 #define STYLE_OPACITY               "opacity"
+#define STYLE_USER                  "user"
 
 #define DEFINITION                  "definition"
 #define DEFINITION_ZINDEX           "z-index"

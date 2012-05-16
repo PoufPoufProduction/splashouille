@@ -160,9 +160,10 @@ public:
     /**
      * Change the current fashion
      * @param _fashionId is the fashion Id as String
+     * @param _force is true than change fashion even if it is the same
      * @return true if the fashion is found
      */
-    bool changeFashion(const std::string & _fashionId);
+    bool changeFashion(const std::string & _fashionId, bool _force = false);
 
     /**
      * Clone the fashion of another object

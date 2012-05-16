@@ -61,11 +61,11 @@ void splashouille::Engine::deleteEngine(splashouille::Engine * _engine)
 }
 
 /** Static values */
-bool                    Engine::debug           = false;
-splashouille::Object *  Engine::mouse           = 0;
-int                     Engine::mouseOffset[2]  = {0, 0};
-bool                    Engine::noMouse         = false;
-std::string             Engine::locale          = "fr";
+bool                                Engine::debug           = false;
+splashouille::Object *              Engine::mouse           = 0;
+int                                 Engine::mouseOffset[2]  = {0, 0};
+splashouille::Engine::mouseModeEnum Engine::mouseMode       = splashouille::Engine::inactive;
+std::string                         Engine::locale          = "fr";
 
 
 /**
@@ -355,8 +355,9 @@ bool Engine::run(SDL_Surface * _surface)
             else
             {
                 // COMPUTE THE MOUSE EVENT IF ANY
-                if (!noMouse)
+                if (mouseMode == splashouille::Engine::active || mouseMode == splashouille::Engine::object)
                 {
+
                     if (event.type == SDL_MOUSEBUTTONDOWN)
                     {
                         mouseState|=(1<<((int)event.button.button-1));
@@ -393,8 +394,13 @@ bool Engine::run(SDL_Surface * _surface)
         // THE MILLISECOND IS THE LIMIT OF THE SDL_GETTICKS()
         if (!onPause && now>=lastNow+delay)
         {
-            // FORWARD THE MOUSE EVENT
-            if (!noMouse) { mouseEvent(now-begin, event.button.x, event.button.y, true, mouseState); }
+            // FORWARD THE MOUSE EVENT (USER<0 MAKE THE MOUSE TEMPORARY INACTIVE)
+            if ( (  mouseMode == splashouille::Engine::active) ||
+                 (  mouseMode == splashouille::Engine::object && mouse &&
+                    mouse->getStyle()->getDisplay() && mouse->getStyle()->getUser()>=0 ) )
+            {
+                mouseEvent(now-begin, event.button.x, event.button.y, true, mouseState);
+            }
 
             // UPDATE THE ELEMENTS
             lastNow = now;

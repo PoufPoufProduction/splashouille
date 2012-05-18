@@ -69,4 +69,5 @@ install:
 	@rm -rf /usr/local/include/splashouille
 	@cp -rf inc/splashouille /usr/local/include
 	@cp libsplashouille.* /usr/local/lib
+	@chmod 755 /usr/local/include/splashouille
 	

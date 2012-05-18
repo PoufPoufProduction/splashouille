@@ -475,7 +475,8 @@ void Crowd::clear(const std::string & _tag)
         {
             std::list<Object*> *                        objects     = itTag->second;
             std::map<std::string, Object *>::iterator   itMap;
-            for (std::list<Object*>::iterator it=objects->begin(); it!=objects->end(); it++)
+
+            for (std::list<Object*>::iterator it=objects->begin(); it!=objects->end(); )
             {
                 // UPDATE THE DROPED OBJECT
                 if ((*it)->getListener()) { (*it)->getListener()->onHide(*it); }
@@ -524,7 +525,7 @@ void Crowd::clear(const std::string & _tag)
     if (Engine::debug)
     {
         std::cout<<std::setw(STD_LABEL)<<std::left<<"Crowd::clear"<<" (animation: "<<animation->getId()<<
-            ") (tag: "<<_tag<<")"<<std::endl;
+            ") (tag: "<<_tag<<") (size map: "<<library.size()<<") (tags list: "<<crowd.size()<<")"<<std::endl;
     }
 }
 

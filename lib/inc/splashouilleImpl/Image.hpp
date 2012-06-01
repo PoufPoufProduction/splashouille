@@ -111,6 +111,7 @@ public:
     SDL_Surface *                           getSurface()                                { return surface; }
     Display                                 getDisplay() const                          { return display; }
     Tileset *                               getTileset() const                          { return tileset; }
+    int                                     getTileIndex() const                        { return tileIndex; }
     int                                     getWidth() const;
     int                                     getHeight() const;
     bool                                    getAlphaColor(int & _r, int & _g, int & _b) const;

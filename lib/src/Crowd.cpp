@@ -273,6 +273,7 @@ void Crowd::log(int _rank) const
         {
             Object *            object      = (*it);
             std::cout<<offset<<"    ["<<index<<"] (key: "<<object->getId()<<") (z-index: "<<object->getZIndex()<<")"<<std::endl;
+            object->log(_rank+2);
             index++;
         }
     }

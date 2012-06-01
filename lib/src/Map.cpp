@@ -242,7 +242,7 @@ bool Map::update(int _timestamp)
                 img->setTag(getTag());
                 img->setZIndex(getZIndex()+(size[1]-j));
                 img->setState(i+j*size[0]);
-                crowd->insertObject(_timestamp, img);
+                crowd->insertObject(initialTimestamp, img);
             }
             break;
         case iso:
@@ -258,7 +258,7 @@ bool Map::update(int _timestamp)
                 img->setTag(getTag());
                 img->setZIndex(getZIndex()+i+j);
                 img->setState(i+j*size[0]);
-                crowd->insertObject(_timestamp, img);
+                crowd->insertObject(initialTimestamp, img);
             }
             break;
         };

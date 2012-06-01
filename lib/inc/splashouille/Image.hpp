@@ -59,6 +59,9 @@ scale           scale the bitmap for fitting the image size
     /** @return the image display mode */
     virtual Display     getDisplay() const = 0;
 
+    /** @return the tileindex in case of the image reference is associated with a tileset */
+    virtual int         getTileIndex() const = 0;
+
     /**
      * create the image surface from its filename
      * @param _filename is the image filename

@@ -236,7 +236,7 @@ bool Map::update(int _timestamp)
             if (first || i<last.position[0] || i>last.position[2] || j<last.position[1] || j>last.position[3] )
             if (map[i+j*size[0]]>=0)
             {
-                snprintf(msg, 128, "%s%d%d", getId().c_str(), i, j);
+                snprintf(msg, 128, "%s%05d%05d", getId().c_str(), i, j);
                 splashouilleImpl::Image * img = dynamic_cast<splashouilleImpl::Image*>(library->copyObject(tileset->getId(), msg));
                 img->setTileIndex(map[i+j*size[0]]);
                 img->setTag(getTag());
@@ -252,7 +252,7 @@ bool Map::update(int _timestamp)
                 current.position[2]>last.position[2] || current.position[3]>last.position[3] )
             if (map[i+j*size[0]]>=0)
             {
-                snprintf(msg, 128, "%s%d%d", getId().c_str(), i, j);
+                snprintf(msg, 128, "%s%05d%05d", getId().c_str(), i, j);
                 splashouilleImpl::Image * img = dynamic_cast<splashouilleImpl::Image*>(library->copyObject(tileset->getId(), msg));
                 img->setTileIndex(map[i+j*size[0]]);
                 img->setTag(getTag());

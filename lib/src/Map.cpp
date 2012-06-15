@@ -136,11 +136,8 @@ bool Map::onObject(splashouille::Object * _object, int _user)
                 float                       p[2];
                 style->getPosition(p[0], p[1]);
 
-                // FORWARD THE RELATIVE POSITION OF THE MAP
-                _object->getStyle()->setRelativeLeft(style->getRelativeLeft());
-                _object->getStyle()->setRelativeTop(style->getRelativeTop());
-
                 // COMPUTE THE TILE POSITION AND MARK OUTSIDE TILES
+                // TODO: SIZE AND OFFSET ARE NOT COMPUTED!
                 switch(mode)
                 {
                 case ortho:
@@ -219,8 +216,9 @@ void Map::getLimits(const splashouille::Style * _style, limits * _limits)
 bool Map::update(int _timestamp)
 {
     char msg[128];
+    int ret = splashouilleImpl::Object::update(_timestamp);
 
-    if (splashouilleImpl::Object::update(_timestamp))
+    if (ret)
     {
         const splashouille::Style * style = fashion->getCurrent();
 
@@ -240,7 +238,7 @@ bool Map::update(int _timestamp)
                 splashouilleImpl::Image * img = dynamic_cast<splashouilleImpl::Image*>(library->copyObject(tileset->getId(), msg));
                 img->setTileIndex(map[i+j*size[0]]);
                 img->setTag(getTag());
-                img->setZIndex(getZIndex()+(size[1]-j));
+                img->setZIndex(getZIndex()+j);
                 img->setState(i+j*size[0]);
                 crowd->insertObject(initialTimestamp, img);
             }
@@ -279,7 +277,7 @@ bool Map::update(int _timestamp)
         lastStyle.copy(style);
     }
 
-    return 0;
+    return ret;
 }
 
 

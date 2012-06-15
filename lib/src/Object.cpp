@@ -34,7 +34,7 @@ using namespace splashouilleImpl;
 int Object::garbageNumber = 0;
 
 Object::Object(const std::string & _id):
-    surface(0), id(_id), tag("default"), initialTimestamp(0), zIndex(0), state(0), mouseOver(false),
+    surface(0), id(_id), tag("default"), initialTimestamp(0), zIndex(0), state(0), nbUpdates(0), mouseOver(false),
     listener(0), associatedData(0)
 {
     source      = new SDL_Rect();
@@ -328,8 +328,10 @@ bool Object::update( int _timestamp)
         source->h = position->h;
 
         splashouille::Engine::add(updateArea, position);
+
     }
 
+    nbUpdates++;
     return (ret);
 }
 

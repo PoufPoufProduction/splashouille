@@ -38,7 +38,7 @@ class Timeline;
 class Crowd;
 class Library;
 
-const static int    nbUpdateRectsMax = 256;
+const static int    nbUpdateRectsMax = 4096;
 
 /**
  * The animation class implementation
@@ -58,10 +58,10 @@ protected:
     Timeline *                              timeline;                       // Save the current timeline pointer for perf
     Crowd *                                 crowd;                          // The animation active objects
     splashouille::Library *                 library;                        // A copy of the library pointer
-    bool                                    donotmove;                      // The animation is static
+    splashouille::Animation::animationType  animationType;                  // The animation type
     Animation *                             parent;                         // If the animation is static : the parent animation
     bool                                    hasChanged;                     // Has the animation style changed ?
-
+    splashouille::Animation::backgroundEnum bg;                             // How to handle the background in non static
 
     Animation(const std::string & _id, libconfig::Setting & _setting, splashouille::Library * _library);
     Animation(const std::string & _id, Animation * _animation, splashouille::Library * _library);
@@ -77,13 +77,14 @@ public:
     /** Accessors */
     splashouille::Timeline *                getTimeline();
     splashouille::Crowd *                   getCrowd();
-    splashouille::Library *                 getLibrary()            { return library; }
-    bool                                    isStatic() const        { return donotmove; }
-    void                                    isStatic(bool _value)   { donotmove = _value; }
-    bool                                    isAnimation() const     { return true; }
-    void                                    setParent(Animation*_a) { if (this!=_a) { parent = _a; } }
+    splashouille::Library *                 getLibrary()                { return library; }
+    bool                                    isStatic() const            { return (animationType == splashouille::Animation::group); }
+    splashouille::Animation::animationType  getAnimationType() const    { return animationType; }
+    bool                                    isAnimation() const         { return true; }
+    void                                    setParent(Animation* _a)    { if (this!=_a) { parent = _a; } }
+    void                                    setBg(splashouille::Animation::backgroundEnum _b)   { bg = _b; }
 
-    void                                    clear()                 { numberOfPixels  = 0; nbUpdateRects   = 0; }
+    void                                    clear()                     { numberOfPixels  = 0; nbUpdateRects   = 0; }
 
     /**
      * Handle the mouseEvent

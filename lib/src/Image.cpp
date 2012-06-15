@@ -346,6 +346,11 @@ void Image::setTileIndex(int _tileIndex)
         tileIndex = _tileIndex;
 
     }
+    else
+    {
+        splashouille::Style * style = fashion->getStyle();
+        style->setWidth(0); style->setHeight(0);
+    }
 }
 
  /**
@@ -358,12 +363,12 @@ bool Image::render(SDL_Surface * _surface, SDL_Rect * _offset)
 {
     const splashouille::Style * style = fashion->getCurrent();
 
-    // Update the SDL_Rect position if necessary
+    // UPDATE THE SDL_RECT POSITION IF NECESSARY
     if (style->getDisplay() && surface)
     {
         SDL_SetAlpha(surface, SDL_SRCALPHA | SDL_RLEACCEL, style->getOpacity());
 
-        // Handle the position regarding the parent offset (if any)
+        // HANDLE THE POSITION REGARDING THE PARENT OFFSET (IF ANY)
         SDL_Rect vPosition;
         SDL_Rect vSource;
         splashouille::Engine::copy(&vPosition, position);
@@ -389,7 +394,7 @@ bool Image::render(SDL_Surface * _surface, SDL_Rect * _offset)
             vSource.h = vPosition.h;
         }
 
-        // Draw the image
+        // DRAW THE IMAGE
         if (vPosition.w>0 && vPosition.h>0) { SDL_BlitSurface(surface, &vSource, _surface, &vPosition); }
     }
 

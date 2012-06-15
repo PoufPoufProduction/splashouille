@@ -30,8 +30,8 @@ SPLASHOUILLE.  If not, see http://www.gnu.org/licenses/
 using namespace splashouilleImpl;
 
 Animation::Animation(const std::string & _id, libconfig::Setting & _setting, splashouille::Library * _library) :
-    splashouilleImpl::Object(_id),
-    numberOfPixels(0), nbUpdateRects(0), timeline(0), library(_library), donotmove(true), parent(0)
+    splashouilleImpl::Object(_id), numberOfPixels(0), nbUpdateRects(0), timeline(0), library(_library),
+    animationType(splashouille::Animation::group), parent(0), bg(color)
 {
     type = TYPE_ANIMATION;
 
@@ -43,8 +43,8 @@ Animation::Animation(const std::string & _id, libconfig::Setting & _setting, spl
 }
 
 Animation::Animation(const std::string & _id, Animation * _animation UNUSED, splashouille::Library * _library) :
-    splashouilleImpl::Object(_id),
-    numberOfPixels(0), nbUpdateRects(0), timeline(0), library(_library), donotmove(true), parent(0)
+    splashouilleImpl::Object(_id),numberOfPixels(0), nbUpdateRects(0), timeline(0), library(_library),
+    animationType(splashouille::Animation::group), parent(0), bg(color)
 {
     type = TYPE_ANIMATION;
 
@@ -56,8 +56,8 @@ Animation::Animation(const std::string & _id, Animation * _animation UNUSED, spl
 }
 
 Animation::Animation(const std::string & _id, splashouille::Library * _library):
-    splashouilleImpl::Object(_id),
-    numberOfPixels(0), nbUpdateRects(0), timeline(0), library(_library), donotmove(true), parent(0)
+    splashouilleImpl::Object(_id), numberOfPixels(0), nbUpdateRects(0), timeline(0), library(_library),
+    animationType(splashouille::Animation::group), parent(0), bg(color)
 {
     type = TYPE_ANIMATION;
 
@@ -96,8 +96,20 @@ bool Animation::import(libconfig::Setting & _setting)
     // Fashion and style import
     Object::import(_setting);
 
-    // Is the animation static
-    if (_setting.exists(DEFINITION_STATIC)) { _setting.lookupValue(DEFINITION_STATIC, donotmove); }
+    // @deprecated: Is the animation static
+    if (_setting.exists(DEFINITION_STATIC)) {
+        bool tmp;
+        _setting.lookupValue(DEFINITION_STATIC, tmp);
+        animationType = tmp?splashouille::Animation::group:splashouille::Animation::dynamic;
+    }
+
+    // GET THE TYPE OF THE MAP
+    std::string strtmp;
+    _setting.lookupValue(DEFINITION_MODE, strtmp);
+    if (!strtmp.compare("static"))      { animationType = splashouille::Animation::group; }     else
+    if (!strtmp.compare("dynamic"))     { animationType = splashouille::Animation::dynamic; }   else
+    if (!strtmp.compare("final"))       { animationType = splashouille::Animation::final; }
+
 
     // Handle the timeline(s)
     if (_setting.exists(TIMELINES))
@@ -129,54 +141,65 @@ bool Animation::import(libconfig::Setting & _setting)
  */
 void Animation::addUpdateRect(const SDL_Rect * _updateRect)
 {
+    SDL_Rect updateRect;
+    splashouille::Engine::copy(&updateRect, _updateRect);
+
     if (isStatic() && parent)
     {
         // STATIC ANIMATIONS DO NOT HANDLE ANY UPDATE RECT: THEY FORWARD THEM TO THEIR PARENT
-        SDL_Rect updateRect;
-        splashouille::Engine::copy(&updateRect, _updateRect);
         splashouille::Engine::offset(&updateRect, position);
-
         parent->addUpdateRect(&updateRect);
     }
     else
     {
-        // CHECK IF THERE IS ANY INTERSECTION WITH PREVIOUS UPDATE RECTS
-        int first = -1;
-        for (int i=0; i<nbUpdateRects; i++)
+        // NOT NECESSARY TO ADD UPDATE RECT IF THE WHOLE SURFACE IS ALREADY UPDATED
+        const splashouille::Style * style = fashion->getCurrent();
+        if (numberOfPixels < style->getWidth() * style->getHeight())
         {
-            if (first<0)
+            int first = -1;
+
+            // IT WOULD BE A GOOD IDEA TO CHECK IF THERE IS ANY INTERSECTION WITH PREVIOUS UPDATE RECTS
+            // BUT WITH A QUADRATIC COMPLEXITY, IT IS REMOVED FOR THE MOMENT
+            /*
+            for (int i=0; i<nbUpdateRects; i++)
             {
-                if (splashouille::Engine::inter(&updateRects[i], _updateRect))
+                if (first<0)
                 {
-                    splashouille::Engine::add(&updateRects[i], _updateRect);
-                    first = i;
+                    if (splashouille::Engine::inter(&updateRects[i], &updateRect))
+                    {
+                        int pixels = updateRects[i].w * updateRects[i].h;
+                        splashouille::Engine::add(&updateRects[i], &updateRect);
+                        numberOfPixels += updateRects[i].w * updateRects[i].h - pixels;
+                        first = i;
+                    }
+                }
+                else
+                {
+                    if (splashouille::Engine::inter(&updateRects[first], &updateRects[i]))
+                    {
+                        int pixels = updateRects[first].w * updateRects[first].h;
+                        splashouille::Engine::add(&updateRects[first], &updateRects[i]);
+                        numberOfPixels += updateRects[first].w * updateRects[first].h - pixels - updateRects[i].w * updateRects[i].h;
+                        updateRects[i].x = updateRects[i].y = updateRects[i].w = updateRects[i].h = 0;
+                    }
                 }
             }
-            else
+            */
+
+            // ADD THE NEW UPDATE RECT IF IT DIDN'T INTERSECT ANYONE
+            if (nbUpdateRects<nbUpdateRectsMax && first<0)
             {
-                if (splashouille::Engine::inter(&updateRects[first], &updateRects[i]))
-                {
-                    splashouille::Engine::add(&updateRects[first], &updateRects[i]);
-                    updateRects[i].x = updateRects[i].y = updateRects[i].w = updateRects[i].h = 0;
-                }
+                splashouille::Engine::copy(&updateRects[nbUpdateRects++], &updateRect);
+                numberOfPixels+=updateRect.w*updateRect.h;
             }
-        }
 
-        // ADD THE NEW UPDATE RECT IF IT DIDN'T INTERSECT ANYONE
-        if (nbUpdateRects<nbUpdateRectsMax && first<0)
-        {
-            splashouille::Engine::copy(&updateRects[nbUpdateRects++], _updateRect);
-            numberOfPixels+=_updateRect->w*_updateRect->h;
-        }
-
-        // DYNAMIC ANIMATIONS FORWARD THE UPDATE RECTS INFORMATION TO THE PARENT IF
-        // IT WASN'T ALREADY DONE BY THE OBJECT::UPDATE METHOD (THE WHOLE ANIMATION IS ON MOVE)
-        if (parent && !hasChanged)
-        {
-            SDL_Rect updateRect;
-            splashouille::Engine::copy(&updateRect, _updateRect);
-            splashouille::Engine::offset(&updateRect, position);
-            parent->addUpdateRect(&updateRect);
+            // DYNAMIC ANIMATIONS FORWARD THE UPDATE RECTS INFORMATION TO THE PARENT IF
+            // IT WASN'T ALREADY DONE BY THE OBJECT::UPDATE METHOD (THE WHOLE ANIMATION IS ON MOVE)
+            if (parent && !hasChanged)
+            {
+                splashouille::Engine::offset(&updateRect, position);
+                parent->addUpdateRect(&updateRect);
+            }
         }
     }
 }
@@ -201,9 +224,12 @@ bool Animation::update(int _timestamp)
     hasChanged=splashouilleImpl::Object::update(_timestamp);
     if (!isStatic() && hasChanged && parent) { parent->addUpdateRect(updateArea); }
 
-    // UPDATE THE TIMELINE
-    timeline->update(_timestamp);
-    crowd->update(_timestamp);
+    // UPDATE THE TIMELINE IF THE ANIMATION IS NOT FINAL
+    if (nbUpdates<=1 || animationType!=splashouille::Animation::final)
+    {
+        timeline->update(_timestamp);
+        crowd->update(_timestamp);
+    }
     return ret;
 }
 
@@ -270,18 +296,19 @@ bool Animation::changeTimeline(const std::string & _timelineId, bool _updateInit
  */
 void Animation::fillWithBackground()
 {
-    if (numberOfPixels && nbUpdateRects)
+    if (numberOfPixels && nbUpdateRects && bg!=splashouille::Animation::none )
     {
-        if (numberOfPixels > surface->w*surface->h)
+        const splashouille::Style * style = fashion->getCurrent();
+        int r,g,b; style->getBackgroundColor(r, g, b);
+
+        if (numberOfPixels >= style->getWidth() * style->getHeight())
         {
-            SDL_FillRect(surface, 0, SDL_MapRGBA(surface->format, 0, 0, 0, 255));
+            SDL_FillRect(surface, 0, SDL_MapRGBA(surface->format, r, g, b, 255));
         }
         else
+        for (int i=0; i<nbUpdateRects; i++)
         {
-            for (int i=0; i<nbUpdateRects; i++)
-            {
-                SDL_FillRect(surface, &updateRects[i], SDL_MapRGBA(surface->format, 0, 0, 0, 255));
-            }
+            SDL_FillRect(surface, &updateRects[i], SDL_MapRGBA(surface->format, r, g, b, 255));
         }
     }
 }
@@ -311,6 +338,9 @@ bool Animation::render(SDL_Surface * _surface, SDL_Rect * _offset)
                                                      RED_MASK, GREEN_MASK, BLUE_MASK, ALPHA_MASK);
             surface = SDL_DisplayFormat(tmp);
             SDL_FreeSurface(tmp);
+
+            int r,g,b; style->getBackgroundColor(r, g, b);
+            SDL_FillRect(surface, 0, SDL_MapRGBA(surface->format, r, g, b, 255));
         }
     }
 
@@ -319,24 +349,20 @@ bool Animation::render(SDL_Surface * _surface, SDL_Rect * _offset)
         // Remove the modified areas by filling with transparent color
         fillWithBackground();
 
-        // Render the animation elements
-        if (style->getDisplay())
+        // Update the offset of the current animation depending on its static attribute
+        SDL_Rect offset;
+        SDL_Rect * p_offset = 0;
+        if (isStatic())
         {
-            // Update the offset of the current animation depending on its static attribute
-            SDL_Rect offset;
-            SDL_Rect * p_offset = 0;
-            if (isStatic())
-            {
-                offset.x = (_offset?_offset->x : 0) + position->x;
-                offset.y = (_offset?_offset->y : 0) + position->y;
-                offset.w = _offset?min(_offset->x+_offset->w, offset.x+position->w) - offset.x : position->w;
-                offset.h = _offset?min(_offset->y+_offset->h, offset.y+position->h) - offset.y : position->h;
-                p_offset = & offset;
-            }
-
-            // Render the crowd
-            crowd->render(surface, p_offset);
+            offset.x = (_offset?_offset->x : 0) + position->x;
+            offset.y = (_offset?_offset->y : 0) + position->y;
+            offset.w = _offset?min(_offset->x+_offset->w, offset.x+position->w) - offset.x : position->w;
+            offset.h = _offset?min(_offset->y+_offset->h, offset.y+position->h) - offset.y : position->h;
+            p_offset = & offset;
         }
+
+        // Render the crowd
+        crowd->render(surface, p_offset);
     }
 
     // Draw the animation surface if it is not static
@@ -377,6 +403,9 @@ bool Animation::render(SDL_Surface * _surface, SDL_Rect * _offset)
             if (vPosition.w>0 && vPosition.h>0) { SDL_BlitSurface(surface, &vSource, _surface, &vPosition); }
         }
     }
+
+    if (parent) { clear(); }
+
     return ret;
 }
 

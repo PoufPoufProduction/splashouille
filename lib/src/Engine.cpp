@@ -152,7 +152,7 @@ bool  splashouille::Engine::inter(const SDL_Rect * _first, const SDL_Rect * _sec
 Engine::Engine(Library * _library): Object(ROOT), Animation(ROOT, _library),
     library(_library), running(false), frame(0), background(0), fps(0), onPause(true)
 {
-    isStatic(true);
+    animationType = splashouille::Animation::group;
 }
 
 Engine::~Engine()
@@ -266,13 +266,11 @@ bool Engine::deleteListener(splashouille::Engine::Listener * _listener)
  */
 void Engine::flip(SDL_Surface * _surface)
 {
-    SDL_Flip(_surface);
+    //SDL_Flip(_surface); return;
+    if (numberOfPixels >= _surface->w*_surface->h)  { SDL_Flip(_surface); }
+    else                                            { SDL_UpdateRects(_surface, nbUpdateRects, updateRects); }
 
-    // TO INVESTIGATE: FLIC WITH SLOW HARDWARE
-    /*
-    if (numberOfPixels > surface->w*surface->h) { SDL_Flip(_surface); }
-    else                                        { SDL_UpdateRects(_surface, nbUpdateRects, updateRects); }
-    */
+    clear();
 }
 
 
@@ -281,18 +279,34 @@ void Engine::flip(SDL_Surface * _surface)
  */
 void Engine::fillWithBackground()
 {
-    if (numberOfPixels && nbUpdateRects && background)
+    const splashouille::Style * style = fashion->getCurrent();
+    int r,g,b; style->getBackgroundColor(r, g, b);
+
+    if (numberOfPixels && nbUpdateRects && bg!=splashouille::Animation::none)
     {
         if (numberOfPixels > surface->w*surface->h)
         {
-            SDL_BlitSurface(background, 0, surface, 0);
+            if (bg==splashouille::Animation::copy && background)
+            {
+                SDL_BlitSurface(background, 0, surface, 0);
+            }
+            else
+            {
+                SDL_FillRect(surface, 0, SDL_MapRGB(surface->format, r, g, 0));
+            }
         }
         else
         {
             for (int i=0; i<nbUpdateRects; i++)
             {
-                SDL_BlitSurface(background, &updateRects[i], surface , &updateRects[i]);
-                //Debug: SDL_FillRect(surface, &updateRects[i], SDL_MapRGB(surface->format, rand()%255, rand()%255, rand()%255));
+                if (bg==splashouille::Animation::copy && background)
+                {
+                    SDL_BlitSurface(background, &updateRects[i], surface , &updateRects[i]);
+                }
+                else
+                {
+                    SDL_FillRect(surface, &updateRects[i], SDL_MapRGB(surface->format, r, g, 0));
+                }
             }
         }
     }
@@ -301,9 +315,10 @@ void Engine::fillWithBackground()
 /**
  * Run the animation
  * @param _surface is the SDL surface for rendering the animation
+ * @param _bg for handling the background
  * @return true if everything is fine
  */
-bool Engine::run(SDL_Surface * _surface)
+bool Engine::run(SDL_Surface * _surface, splashouille::Animation::backgroundEnum _bg)
 {
     SDL_Event       event;
     int             frameSec        = 0;
@@ -316,6 +331,7 @@ bool Engine::run(SDL_Surface * _surface)
     int             delay           = fps?1000/fps:1;
 
     // Save the background
+    bg              = _bg;
     background      = SDL_DisplayFormat(_surface);
 
     // Some initialisations
@@ -436,11 +452,10 @@ bool Engine::run(SDL_Surface * _surface)
             if (numberOfPixels)
             {
                 render(_surface);
-                if (_surface->flags&SDL_DOUBLEBUF) { flip(_surface); } else flip(_surface);
+                flip(_surface);
             }
 
             frame++; frameSec++;
-            clear(); // TODO: move this in Animation::render
         }
 
         now = SDL_GetTicks();

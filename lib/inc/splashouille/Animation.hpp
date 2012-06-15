@@ -37,6 +37,18 @@ class Library;
 class Animation : virtual public splashouille::Object
 {
 public:
+    /** The background usage for not static animation (or engine) : none: no background,
+     * color : use the style->backgroundcolor, copy: use the original surface (only for engine)
+     */
+    enum backgroundEnum { none = 0, color, copy };
+
+    /** The Animation type. group : animation is just a group of objects which are dealt by
+     *  the parent animation, dynamic : animation is handling its own surface and the child objects
+     *  final : animation is dynamic but const is not refresh after the first update
+     */
+    enum animationType { group = 0, dynamic, final };
+
+public:
     /**
      * Each animation is defined by one or more timelines. Only one is active.
      * @return the active animation timeline
@@ -55,11 +67,8 @@ public:
      */
     virtual splashouille::Library * getLibrary() = 0;
 
-    /** @return true if the animation is static */
-    virtual bool isStatic() const = 0;
-
-    /** Set the animation static or dynamic */
-    virtual void isStatic(bool _value) = 0;
+    /** @return the animation type */
+    virtual splashouille::Animation::animationType getAnimationType() const = 0;
 
     /**
      * Change the current timeline

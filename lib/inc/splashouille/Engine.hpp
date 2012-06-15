@@ -185,9 +185,10 @@ public:
     /**
      * Run the animation
      * @param _surface is the SDL surface for rendering the animation
+     * @param _bg for handling the background
      * @return true if everything is fine
      */
-    virtual bool run(SDL_Surface * _surface ) = 0;
+    virtual bool run(SDL_Surface * _surface, splashouille::Animation::backgroundEnum _bg = splashouille::Animation::copy ) = 0;
 };
 
 }

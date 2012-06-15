@@ -122,7 +122,7 @@ void Player::run()
 
     // CREATE THE SDL WINDOW
     std::cout<<"  Screen size: ("<<screenSize[0]<<" x "<<screenSize[1]<<") (depth: "<<screenDepth<<")"<<std::endl;
-    SDL_Surface * screen = SDL_SetVideoMode(screenSize[0], screenSize[1], screenDepth, SDL_SWSURFACE | SDL_DOUBLEBUF );
+    SDL_Surface * screen = SDL_SetVideoMode(screenSize[0], screenSize[1], screenDepth, SDL_SWSURFACE );
 
     // OPEN AND PARSE THE CONFIGURATION FILE
     do {
@@ -147,7 +147,7 @@ void Player::run()
         {
             engine->addListener(this);
             // RUN THE APPLICATION
-            engine->run(screen);
+            engine->run(screen, splashouille::Animation::color );
         }
 
         delete configuration;

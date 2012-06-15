@@ -63,6 +63,7 @@ public:
     int                                     initialTimestamp;       // The initial timestamp of the object
     int                                     zIndex;                 // The object z-index;
     int                                     state;                  // The callback state parameter
+    unsigned long                           nbUpdates;              // The number of updates of the object
     bool                                    mouseOver;              // Is the mouse over the object
 
     splashouille::Object::Listener *        listener;               // The object listener

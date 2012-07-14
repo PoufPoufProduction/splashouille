@@ -299,52 +299,54 @@ Image::~Image()
  */
 void Image::setTileIndex(int _tileIndex)
 {
-    if (_tileIndex!=tileIndex && tileset && tileset->tiles[_tileIndex])
+    if (tileset && tileset->tiles[_tileIndex])
     {
-        // SAVE THE CURRENT STYLE
-        Fashion * newFashion = new Fashion();
-        newFashion->getStyle()->copy(fashion->getStyle());
-
-        // REMOVE THE OLD FASHIONS
-        for (FashionMap::iterator vIt=fashions.begin(); vIt!=fashions.end(); vIt++) { delete vIt->second; }
-        fashions.clear();
-
-        // BUILD A NEW FASHION
-        fashionId           = "default";
-        fashion             = newFashion;
-        initialTimestamp    = -1;
-        fashions.insert(std::pair<std::string, Fashion*>(fashionId, fashion));
-
-        Tileset::Tile * tile = tileset->tiles[_tileIndex];
-
-        // CHECK IF THE TILESET ANIMATION IS LOOPING
-        Tileset::Tile * tileTmp = tile;
-        int period = 0;
-        int loop = true;
-        while (tileTmp) {
-            period += tileTmp->delayInMilliseconds;
-            if (!tileTmp->delayInMilliseconds) { loop=false;}
-            tileTmp=tileTmp->next;
-        };
-        if (!loop) { period = 0; }
-
-        // CREATE THE TRANSITIONS
-        int timestamp = 0;
-        while (tile)
+        if (_tileIndex!=tileIndex)
         {
-            splashouille::Style * style = fashion->addTransition(timestamp, timestamp, 1, 1, period);
-            style->setPosition(tile->position[0], tile->position[1]);
-            if (tile->size[0])  { style->setWidth(tile->size[0]); }
-            if (tile->size[1])  { style->setHeight(tile->size[1]); }
-            if (tile->offset[0]){ style->setRelativeLeft(tile->offset[0]); }
-            if (tile->offset[1]){ style->setRelativeTop(tile->offset[1]); }
+            // SAVE THE CURRENT STYLE
+            Fashion * newFashion = new Fashion();
+            newFashion->getStyle()->copy(fashion->getStyle());
 
-            timestamp+=tile->delayInMilliseconds;
-            tile = tile->next;
-        };
+            // REMOVE THE OLD FASHIONS
+            for (FashionMap::iterator vIt=fashions.begin(); vIt!=fashions.end(); vIt++) { delete vIt->second; }
+            fashions.clear();
 
-        tileIndex = _tileIndex;
+            // BUILD A NEW FASHION
+            fashionId           = "default";
+            fashion             = newFashion;
+            initialTimestamp    = -1;
+            fashions.insert(std::pair<std::string, Fashion*>(fashionId, fashion));
 
+            Tileset::Tile * tile = tileset->tiles[_tileIndex];
+
+            // CHECK IF THE TILESET ANIMATION IS LOOPING
+            Tileset::Tile * tileTmp = tile;
+            int period = 0;
+            int loop = true;
+            while (tileTmp) {
+                period += tileTmp->delayInMilliseconds;
+                if (!tileTmp->delayInMilliseconds) { loop=false;}
+                tileTmp=tileTmp->next;
+            };
+            if (!loop) { period = 0; }
+
+            // CREATE THE TRANSITIONS
+            int timestamp = 0;
+            while (tile)
+            {
+                splashouille::Style * style = fashion->addTransition(timestamp, timestamp, 1, 1, period);
+                style->setPosition(tile->position[0], tile->position[1]);
+                if (tile->size[0])  { style->setWidth(tile->size[0]); }
+                if (tile->size[1])  { style->setHeight(tile->size[1]); }
+                if (tile->offset[0]){ style->setRelativeLeft(tile->offset[0]); }
+                if (tile->offset[1]){ style->setRelativeTop(tile->offset[1]); }
+
+                timestamp+=tile->delayInMilliseconds;
+                tile = tile->next;
+            };
+
+            tileIndex = _tileIndex;
+        }
     }
     else
     {

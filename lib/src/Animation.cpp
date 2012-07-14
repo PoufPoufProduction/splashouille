@@ -334,7 +334,8 @@ bool Animation::render(SDL_Surface * _surface, SDL_Rect * _offset)
         else
         {
             if (surface) { SDL_FreeSurface(surface); }
-            SDL_Surface * tmp = SDL_CreateRGBSurface(SDL_SWSURFACE, position->w*1.4, position->h*1.4, 32,
+            float ratio = (animationType==splashouille::Animation::final?1:1.4);
+            SDL_Surface * tmp = SDL_CreateRGBSurface(SDL_SWSURFACE, position->w*ratio, position->h*ratio, 32,
                                                      RED_MASK, GREEN_MASK, BLUE_MASK, ALPHA_MASK);
             surface = SDL_DisplayFormat(tmp);
             SDL_FreeSurface(tmp);

@@ -93,7 +93,15 @@ bool Event::import(splashouille::Library * _library, libconfig::Setting & _setti
         _setting.lookupValue(EVENT_PARENT, parentStr);
         object = _library->copyObject(parentStr, objectId);
 
-        if (object)     { dynamic_cast<Object*>(object)->import(_setting); }
+        if (object)
+        {
+            dynamic_cast<Object*>(object)->import(_setting);
+            if (_setting.exists(EVENT_VALUE))
+            {
+                _setting.lookupValue(EVENT_VALUE, valueStr);
+                object->changeFashion(valueStr);
+            }
+        }
 
         ret = (object!=0);
     }
